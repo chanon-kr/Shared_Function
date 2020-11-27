@@ -2,6 +2,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 class da_tran_SQL :
+    """interact with SQL"""
     def __init__(self, sql_type, host_name, database_name, user, password , **kwargs):
         """Create connection to SQL Server"""
         
@@ -14,7 +15,7 @@ class da_tran_SQL :
                            + '://' + user + ':' + password + '@' + host_name
                            + ':' + kwargs.get('port',type_dic[sql_type][2]) + '/' + database_name)
         self.engine = create_engine(connection_str)
-        print(pd.read_sql_query("""SELECT 'Connection to {} in {} : OK'""".format(database_name,host_name), con = self.engine).iloc[0,0]) 
+        print(pd.read_sql_query("""SELECT 'Connection OK'""", con = self.engine).iloc[0,0]) 
 
     def read(self, table_name_in, condition_in = ''):
         """Read Table or View"""
@@ -45,7 +46,9 @@ class da_tran_SQL :
             while i < len(list_key) :
                 filter_name = list_key[i]
                 filter_filter = tuple(df_in[filter_name].astype('str').unique())
-                filter_filter = str(filter_filter)
+                if len(filter_filter) == 1 : filter_filter = str('(' + str(filter_filter[0]) + ')') # tuple with 1 value will be ( x , ) => need to convert
+                elif len(filter_filter) > 1 :filter_filter = str(filter_filter) # tuple with > 1 values will be ( x, y, z) which can be use in SQL
+                else : continue
                 
                 if i > 0 : sql_q += ' and '
                 
@@ -55,11 +58,10 @@ class da_tran_SQL :
         #if key is not either string or list
         else :
             raise Exception("List of Key must be string or list")
-
+        
         #Delete exiting row from table
         try :
             print('Start delete old data at',pd.Timestamp.now())
-            print('\n',sql_q,'\n')
             self.engine.execute(sql_q)
             print('Delete Last '+str(list_key)+' at',pd.Timestamp.now())
         except :
@@ -72,7 +74,7 @@ class da_tran_SQL :
 
     def dump_new(self, df_in, table_name_in, list_key) :
         """Delete exists row of df that has same key(s) as table and dump df_in append to table"""
-        print(table_name_in,' Start ',pd.Timestamp.now())
+        print('Start Filter Existing data from df at ',pd.Timestamp.now())
         #for single key
         if 'str' in str(type(list_key))  :
             if not list_key in df_in.columns :
