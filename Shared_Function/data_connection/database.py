@@ -1,92 +1,107 @@
 import pandas as pd
-from datetime import datetime
 from sqlalchemy import create_engine
 
-def dump_replace_existsame(df_in, con_dict, table_name_in,filter_in) :
-    """Create connection to database, delete exists row of table in database with key filter_in and dump df_in append to table"""
-    print(table_name_in,' Start ',datetime.now())
-    #Create connection to database
-    connection_str = str(con_dict['type'] + '+' + con_dict['driver'] 
-                    + '://' + con_dict['user'] + ':' + con_dict['pass'] + '@' + con_dict['host'] 
-                    + ':' + con_dict['port'] + '/' + con_dict['database'])
+class da_tran_SQL :
+    def __init__(self, sql_type, host_name, database_name, user, password , **kwargs):
+        """Create connection to SQL Server"""
+        
+        type_dic = {'MSSQL' : ['mssql', 'pymssql', '1433']}
+        
+        if type_dic.get(sql_type,'Error') == 'Error' :
+            raise Exception("Please Insert Type of your Database with these range \n{}".format(list(type_dic.keys())))
+        
+        connection_str = str(type_dic[sql_type][0] + '+' + kwargs.get('driver',type_dic[sql_type][1])
+                           + '://' + user + ':' + password + '@' + host_name
+                           + ':' + kwargs.get('port',type_dic[sql_type][2]) + '/' + database_name)
+        self.engine = create_engine(connection_str)
+        print(pd.read_sql_query("""SELECT 'Connection to {} in {} : OK'""".format(database_name,host_name), con = self.engine).iloc[0,0]) 
 
-    engine = create_engine(connection_str)
-    sql_q = 'delete from ' + table_name_in + ' where '
+    def read(self, table_name_in, condition_in = ''):
+        """Read Table or View"""
+        sql_q = """SELECT * FROM [{}]""".format(table_name_in)
+        if not condition_in == '' :
+            sql_q += """ WHERE """ + condition_in
+        return pd.read_sql_query(sql_q , con = self.engine)
 
-    #Create SQL Query for Delete
-    i = 0
-    while i < len(filter_in) :
-        filter_name = filter_in[i]
-        filter_filter = tuple(df_in[filter_name].astype('str').unique())
-        #prevent error for 1 filter row by add ()
-        if len(filter_filter) == 1 :
-            filter_filter = "('" + filter_filter[0] + "')"
-        else :
+
+    def dump_replace(self, df_in, table_name_in, list_key):
+        """Delete exists row of table in database with same key(s) as df and dump df append to table"""
+        #Create SQL Query for Delete
+        sql_q = 'delete from ' + table_name_in + ' where '
+
+        #for single key
+        if 'str' in str(type(list_key))  :
+            if not list_key in df_in.columns :
+                raise Exception("{} is not in df's columns".format(list_key))       
+            filter_filter = tuple(df_in[list_key].astype('str').unique())
             filter_filter = str(filter_filter)
+            sql_q += '[' + list_key  + ']' + ' in ' + filter_filter
 
-        #Add "and" for second columns 
-        if i > 0 :
-            sql_q = sql_q + ' and '
+        #for multi keys    
+        elif 'list' in str(type(list_key)) :
+            if not min(x in df_in.columns for x in list_key) :
+                raise Exception("Some keys are not in df's columns")
+            i = 0
+            while i < len(list_key) :
+                filter_name = list_key[i]
+                filter_filter = tuple(df_in[filter_name].astype('str').unique())
+                filter_filter = str(filter_filter)
+                
+                if i > 0 : sql_q += ' and '
+                
+                sql_q += '[' + filter_name  + ']' + ' in ' + filter_filter
+                i += 1
 
-        sql_q = sql_q + '[' + filter_name  + ']' + ' in ' + filter_filter
-        i += 1
+        #if key is not either string or list
+        else :
+            raise Exception("List of Key must be string or list")
 
-    #Delete exiting row from table
-    try :
-        print('start delete')
-        engine.execute(sql_q)
-        print('Delete Last '+str(filter_in)+' at',datetime.now())
-    except :
-        print('Delete error or Do not have table to delete at',datetime.now())
-        pass
+        #Delete exiting row from table
+        try :
+            print('Start delete old data at',pd.Timestamp.now())
+            print('\n',sql_q,'\n')
+            self.engine.execute(sql_q)
+            print('Delete Last '+str(list_key)+' at',pd.Timestamp.now())
+        except :
+            print('Delete error or Do not have table to delete at',pd.Timestamp.now())
+            pass
 
-    #Dump df_in append to database
-    df_in.to_sql(table_name_in,con = engine,index = False,if_exists = 'append',chunksize = 150, method = 'multi')
-    print(table_name_in,' End ',datetime.now())
-    return True
+        #Dump df_in append to database
+        df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'append',chunksize = 150, method = 'multi')
+        print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
 
-def dump_only_new(df_in, con_dict, table_name_in,filter_in) :
-    """Create connection to database, delete exists row of df that has key filter_in and dump df_in append to table --not test yet"""
-    print(table_name_in,' Start ',datetime.now())
-    #Create connection to database
-    connection_str = str(con_dict['type'] + '+' + con_dict['driver'] 
-                    + '://' + con_dict['user'] + ':' + con_dict['pass'] + '@' + con_dict['host'] 
-                    + ':' + con_dict['port'] + '/' + con_dict['database'])
+    def dump_new(self, df_in, table_name_in, list_key) :
+        """Delete exists row of df that has same key(s) as table and dump df_in append to table"""
+        print(table_name_in,' Start ',pd.Timestamp.now())
+        #for single key
+        if 'str' in str(type(list_key))  :
+            if not list_key in df_in.columns :
+                raise Exception("{} is not in df's columns".format(list_key))       
+            sql_q = 'select distinct '+ '[' +  list_key + ']' +' from ' + table_name_in
+            filter_filter = pd.read_sql_query(sql_q, con = self.engine).iloc[:,0]
+            logic_filter = ~df_in[list_key].isin(filter_filter)
 
-    engine = create_engine(connection_str)
+        #for multi keys    
+        elif 'list' in str(type(list_key)) :
+            if not min(x in df_in.columns for x in list_key) :
+                raise Exception("Some keys are not in df's columns")
+            i = 0
+            while i < len(list_key) :
+                filter_name = list_key[i]
+                sql_q = 'select distinct '+ '[' +  filter_name + ']' +' from ' + table_name_in
+                filter_filter = pd.read_sql_query(sql_q, con = self.engine).iloc[:,0]
+                if i == 0 : logic_filter = df_in[filter_name].isin(filter_filter)
+                else : logic_filter = (logic_filter) & (df_in[filter_name].isin(filter_filter))
+                i += 1
 
-    #Loop delete --may get error , not test yet
-    for i_in in filter_in :
-        #get key values from database
-        filter_name = filter_in
-        sql_q = 'select distinct '+ '[' +  filter_name + ']' +' from ' + table_name_in
-        filter_filter = pd.read_sql_query(sql_q, con = engine111)
+            logic_filter = ~logic_filter
 
-        #delete existing key from df_in
-        filter_filter = ~df_in[filter_name].astype('str').isin(filter_filter[filter_name].astype('str'))
-        df_in = df_in[filter_filter]
+        #if key is not either string or list
+        else :
+            raise Exception("List of Key must be string or list")
 
-    #Dump df_in append to database
-    df_in.to_sql(table_name_in,con = engine111,index = False,if_exists = 'append',chunksize = 150, method = 'multi')
-    print(table_name_in,' End ',datetime.now())
-    return True
+        df_in = df_in[logic_filter]
 
-# # Sample 
-"""
-config_db = {
-            'type' :'BAHBAHBAH',  # type of database you use
-            'driver':'BAHBAHBAH',  # type of driver you use
-            'user' : 'BAHBAHBAH', # user to connect database
-            'pass' : 'BAHBAHBAH', # password to connect database
-            'host' :'BAHBAHBAH' , # server's name or server's ip
-            'port' : 'BAHBAHBAH', # port number
-            'database' : 'BAHBAHBAH' # database's name
-            }
-
-df = pd.DataFrame({'BAH':[1,2,3,4],'BAHBAH':[1,2,3,4],'BAHBAHBAH':[1,2,3,4]}) # Pandas dataframe
-filter_in = ['BAH' , 'BAHBAH' , 'BAHBAHBAH'] # List of Key column
-table = 'BAHBAHBAH' # Table's name
-
-dump_replace_existsame(df, config_db, table ,filter_in)
-dump_only_new(df, config_db, table ,filter_in)
-"""
+        #Dump df_in append to database
+        df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'append',chunksize = 150, method = 'multi')
+        print('Dump data to ',table_name_in,' End ', pd.Timestamp.now())
