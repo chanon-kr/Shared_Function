@@ -24,19 +24,45 @@ class da_tran_SQL :
             sql_q += """ WHERE """ + condition_in
         return pd.read_sql_query(sql_q , con = self.engine)
 
+    def write_logic_sql(self, key , value_in):
+        """Write SQL Condition Query that include >, <, ="""
+        logic_query = '['+ str(key) + '] ' + value_in['logic'] + ' '
+        value_in['type'] = value_in.get('type','')
+        if value_in.get('value','there is no value') != 'there is no value' :
+            if ('date' in value_in['type']) | ('time' in value_in['type']):  # Datetime will need '' in SQL Statement
+                logic_query += """'""" + str(value_in['value']) + """'"""
+            else : logic_query += str(value_in['value'])
+        else : raise Exception("Please insert value data")  # will get error if not specific value
+        return logic_query
 
-    def dump_replace(self, df_in, table_name_in, list_key):
+    def write_in_sql(self,df_in , key) :
+        """Write SQL Condition Query 'in (x,x,x)'"""
+        filter_filter = tuple(df_in[key].astype('str').unique())
+        if len(filter_filter) == 1 : 
+            filter_filter = str('(' + str(filter_filter[0]) + ')') # tuple with 1 value will be ( x , ) => need to convert
+            logic_query = '[' + key  + ']' + ' in ' + filter_filter
+        elif len(filter_filter) > 1 :
+            filter_filter = str(filter_filter) # tuple with > 1 values will be ( x, y, z) which can be use in SQL
+            logic_query = '[' + key  + ']' + ' in ' + filter_filter
+        else : logic_query = '' # Return Nothing
+        return logic_query
+
+    def dump_replace(self, df_in, table_name_in, list_key, math_logic = ''):
         """Delete exists row of table in database with same key(s) as df and dump df append to table"""
         #Create SQL Query for Delete
         sql_q = 'delete from ' + table_name_in + ' where '
 
+        if math_logic != '' : logic_list = list(math_logic.keys())
+        else : logic_list = ['There_is_no_logic_math_need_to_write'] # column in logic_list will never be true
+
         #for single key
         if 'str' in str(type(list_key))  :
             if not list_key in df_in.columns :
-                raise Exception("{} is not in df's columns".format(list_key))       
-            filter_filter = tuple(df_in[list_key].astype('str').unique())
-            filter_filter = str(filter_filter)
-            sql_q += '[' + list_key  + ']' + ' in ' + filter_filter
+                raise Exception("{} is not in df's columns".format(list_key))
+            if list_key in logic_list :
+                sql_q += self.write_logic_sql(list_key, math_logic[list_key])
+            else :  
+                sql_q += self.write_in_sql(df_in,list_key)
 
         #for multi keys    
         elif 'list' in str(type(list_key)) :
@@ -45,15 +71,12 @@ class da_tran_SQL :
             i = 0
             while i < len(list_key) :
                 filter_name = list_key[i]
-                filter_filter = tuple(df_in[filter_name].astype('str').unique())
-                if len(filter_filter) == 1 : filter_filter = str('(' + str(filter_filter[0]) + ')') # tuple with 1 value will be ( x , ) => need to convert
-                elif len(filter_filter) > 1 :filter_filter = str(filter_filter) # tuple with > 1 values will be ( x, y, z) which can be use in SQL
-                else : continue
-                
-                if i > 0 : sql_q += ' and '
-                
-                sql_q += '[' + filter_name  + ']' + ' in ' + filter_filter
+                if filter_name in logic_list :
+                    sql_q += self.write_logic_sql(filter_name, math_logic[filter_name])
+                else :
+                    sql_q += self.write_in_sql(df_in,filter_name)
                 i += 1
+                if i < len(list_key) : sql_q += ' and '
 
         #if key is not either string or list
         else :
@@ -75,6 +98,7 @@ class da_tran_SQL :
     def dump_new(self, df_in, table_name_in, list_key) :
         """Delete exists row of df that has same key(s) as table and dump df_in append to table"""
         print('Start Filter Existing data from df at ',pd.Timestamp.now())
+
         #for single key
         if 'str' in str(type(list_key))  :
             if not list_key in df_in.columns :
