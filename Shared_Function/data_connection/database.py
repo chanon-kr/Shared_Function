@@ -17,11 +17,23 @@ class da_tran_SQL :
         self.engine = create_engine(connection_str)
         print(pd.read_sql_query("""SELECT 'Connection OK'""", con = self.engine).iloc[0,0]) 
 
-    def read(self, table_name_in, condition_in = ''):
-        """Read Table or View"""
-        sql_q = """SELECT * FROM [{}]""".format(table_name_in)
-        if not condition_in == '' :
-            sql_q += """ WHERE """ + condition_in
+    def read(self, table_name_in, condition_in = '', SP = False, param = ''):
+        """Read Table or View or Store Procedure"""
+        if SP :
+            sql_q = """EXEC """ + table_name_in + ' '
+            if param == '' : raise Exception("Please insert SP's parameter")
+            elif type(param) != dict : raise Exception("param must be dict")
+            else :
+                n = 0
+                for i in param.keys() :
+                    if type(param[i]) == str : param[i] = """'{}'""".format(param[i])
+                    if n > 0 : sql_q += ' , '
+                    sql_q += """ {} = {}""".format(i, param[i])
+                    n += 1
+        else :
+            sql_q = """SELECT * FROM [{}]""".format(table_name_in)
+            if not condition_in == '' :
+                sql_q += """ WHERE """ + condition_in
         return pd.read_sql_query(sql_q , con = self.engine)
 
     def write_logic_sql(self, key , value_in):
