@@ -35,6 +35,13 @@ class da_tran_SQL :
         else : raise Exception("Please insert value data")  # will get error if not specific value
         return logic_query
 
+    def dump_whole(self, df_in, table_name_in) :
+        """Delete exists table and replace with new df"""
+        print('Start Filter Existing data from df at ',pd.Timestamp.now())
+        #Dump df_in to database
+        df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'replace',chunksize = 150, method = 'multi')
+        print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
+
     def write_in_sql(self,df_in , key) :
         """Write SQL Condition Query 'in (x,x,x)'"""
         filter_filter = tuple(df_in[key].astype('str').unique())

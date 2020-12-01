@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="Shared_Function",
-    version="0.0.3",
+    version="0.0.4",
     author="Chanon Krittapholchai",
     author_email="chanon.krittapholchai@gmail.com",
     description="A shared function that use within my team",
