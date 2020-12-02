@@ -58,11 +58,10 @@ class da_tran_SQL :
         """Write SQL Condition Query 'in (x,x,x)'"""
         filter_filter = tuple(df_in[key].astype('str').unique())
         if len(filter_filter) == 1 : 
-            filter_filter = str('(' + str(filter_filter[0]) + ')') # tuple with 1 value will be ( x , ) => need to convert
-            logic_query = '[' + key  + ']' + ' in ' + filter_filter
+            filter_filter = str(filter_filter).replace(',)',')')  # tuple with 1 value will be ( x , ) => need to convert
         elif len(filter_filter) > 1 :
             filter_filter = str(filter_filter) # tuple with > 1 values will be ( x, y, z) which can be use in SQL
-            logic_query = '[' + key  + ']' + ' in ' + filter_filter
+        logic_query = '[' + key  + ']' + ' in ' + filter_filter
         else : logic_query = '' # Return Nothing
         return logic_query
 
