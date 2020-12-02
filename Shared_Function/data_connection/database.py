@@ -66,7 +66,7 @@ class da_tran_SQL :
         else : logic_query = '' # Return Nothing
         return logic_query
 
-    def dump_replace(self, df_in, table_name_in, list_key, math_logic = ''):
+    def dump_replace(self, df_in, table_name_in, list_key, math_logic = '',debug = False):
         """Delete exists row of table in database with same key(s) as df and dump df append to table"""
         #Create SQL Query for Delete
         sql_q = 'delete from ' + table_name_in + ' where '
@@ -106,10 +106,12 @@ class da_tran_SQL :
             print('Start delete old data at',pd.Timestamp.now())
             self.engine.execute(sql_q)
             print('Delete Last '+str(list_key)+' at',pd.Timestamp.now())
-        except :
+        except Exception as e:
             print('Delete error or Do not have table to delete at',pd.Timestamp.now())
+            if degug : print(e)
             pass
-
+            
+        if degug : print(sql_q)
         #Dump df_in append to database
         df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'append',chunksize = 150, method = 'multi')
         print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
