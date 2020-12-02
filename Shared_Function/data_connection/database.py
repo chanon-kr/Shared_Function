@@ -59,9 +59,10 @@ class da_tran_SQL :
         filter_filter = tuple(df_in[key].astype('str').unique())
         if len(filter_filter) == 1 : 
             filter_filter = str(filter_filter).replace(',)',')')  # tuple with 1 value will be ( x , ) => need to convert
+            logic_query = '[' + key  + ']' + ' in ' + filter_filter
         elif len(filter_filter) > 1 :
             filter_filter = str(filter_filter) # tuple with > 1 values will be ( x, y, z) which can be use in SQL
-        logic_query = '[' + key  + ']' + ' in ' + filter_filter
+            logic_query = '[' + key  + ']' + ' in ' + filter_filter
         else : logic_query = '' # Return Nothing
         return logic_query
 
