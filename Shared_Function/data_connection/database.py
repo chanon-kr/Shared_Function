@@ -108,10 +108,10 @@ class da_tran_SQL :
             print('Delete Last '+str(list_key)+' at',pd.Timestamp.now())
         except Exception as e:
             print('Delete error or Do not have table to delete at',pd.Timestamp.now())
-            if degug : print(e)
+            if debug : print(e)
             pass
             
-        if degug : print(sql_q)
+        if debug : print(sql_q)
         #Dump df_in append to database
         df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'append',chunksize = 150, method = 'multi')
         print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
