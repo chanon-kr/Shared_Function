@@ -4,7 +4,10 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
-
+from datetime import datetime
+import os
+import csv
+import re
 
 class email_sender :
     def __init__(self, user, password, servername):
@@ -49,3 +52,17 @@ class email_sender :
 
         #Sending Email and return status text
         return self.executor(recipients, message)
+
+def log_csv(file_name,msg_in):
+    logic = True
+    if os.path.exists(file_name) : logic = False
+    if '/' in file_name : 
+        if file_name.split('/')[0] != '' :
+            print(file_name.split('/')[0])
+            dir_name = re.sub('(/.*\..*)','',file_name)
+            if not os.path.isdir(dir_name) : os.mkdir(dir_name)
+    with open(file_name.replace('/',''), 'a', newline='') as csvfile:
+        fieldnames = ['Timestamp','msg']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        if logic : writer.writeheader()
+        writer.writerow({'Timestamp':str(datetime.now()),'msg':msg_in})
