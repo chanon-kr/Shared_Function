@@ -5,7 +5,7 @@ class da_tran_SQL :
     """interact with SQL"""
     def __init__(self, sql_type, host_name, database_name, user, password , **kwargs):
         """Create connection to SQL Server"""
-        
+
         type_dic = {'MSSQL' : ['mssql', 'pymssql', '1433']}
         
         if type_dic.get(sql_type,'Error') == 'Error' :
@@ -116,7 +116,55 @@ class da_tran_SQL :
         df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'append',chunksize = 150, method = 'multi')
         print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
 
-    def dump_new(self, df_in, table_name_in, list_key) :
+    def dump_new(self, df_in, table_name_in, list_key , debug = False) :
+        """Delete exists row of df that has same key(s) as table and dump df_in append to table"""
+        print('Start Filter Existing data from df at ',pd.Timestamp.now())
+
+        #for single key
+        if 'str' in str(type(list_key))  :
+            if not list_key in df_in.columns :
+                raise Exception("{} is not in df's columns".format(list_key))       
+            sql_q = 'select distinct '+ '[' +  list_key + ']' +' from ' + table_name_in
+            filter_filter = pd.read_sql_query(sql_q, con = self.engine).iloc[:,0]
+            logic_filter = ~df_in[list_key].isin(filter_filter)
+
+        #for multi keys    
+        elif 'list' in str(type(list_key)) :
+            if not min(x in df_in.columns for x in list_key) :
+                raise Exception("Some keys are not in df's columns")
+            i = 0
+            df_in['key_sql_filter'] = ''
+            sql_q = 'SELECT DISTINCT '
+            while i < len(list_key) :
+                filter_name = list_key[i]
+                if i != 0 : sql_q += ' , '
+                df_in['key_sql_filter'] = df_in['key_sql_filter'].astype('str') + df_in[filter_name].astype('str')
+                sql_q += '[' +  filter_name + '] ' 
+                i += 1
+            sql_q += ' FROM ' + table_name_in
+            if debug : print(sql_q)
+            filter_filter = pd.read_sql_query(sql_q, con = self.engine)
+            filter_filter['key_sql_filter'] = ''
+            for i in filter_filter.columns :
+                if  i == 'key_sql_filter' : pass
+                else : filter_filter['key_sql_filter'] = filter_filter['key_sql_filter'].astype('str') + filter_filter[i].astype('str')
+            if debug : print(filter_filter.head())
+            filter_filter = filter_filter['key_sql_filter'].unique()
+            if debug : print('======filter======\n',filter_filter,'\n======in======\n',df_in.head())
+            logic_filter = ~df_in['key_sql_filter'].isin(filter_filter)
+            df_in = df_in.drop('key_sql_filter', axis = 1)
+
+        #if key is not either string or list
+        else :
+            raise Exception("List of Key must be string or list")
+
+        df_in = df_in[logic_filter]
+
+        #Dump df_in append to database
+        df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'append',chunksize = 150, method = 'multi')
+        print('Dump data to ',table_name_in,' End ', pd.Timestamp.now())
+
+    def dump_new_old(self, df_in, table_name_in, list_key) :
         """Delete exists row of df that has same key(s) as table and dump df_in append to table"""
         print('Start Filter Existing data from df at ',pd.Timestamp.now())
 
