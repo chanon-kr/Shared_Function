@@ -45,21 +45,21 @@ class da_tran_SP365:
         self.ctx.web.get_folder_by_server_relative_url(dir_).upload_file(name, file_content).execute_query() # upload file to sharepoint
 
     def read_list(self, list_title, local_location = '', as_dataframe = False):
-        """Read list from Sharepoint and Download as csv"""
+        """Read list from Sharepoint and Download as csv or pandas dataframe"""
         list_to_export = self.ctx.web.lists.get_by_title(list_title)
         list_items = list_to_export.items.get().execute_query()
         self.list_items = list_items
-        if len(list_items) == 0:
-            print("No data found")
+        if len(list_items) == 0: print("No data found")
         else :
             if as_dataframe :
-                pass
-                #return
+                df_in = pd.DataFrame()
+                for i in list_items : df_in = df_in.append(pd.DataFrame(data = [list(i.properties.values())], columns = i.properties.keys()))
+                return df_in
+            elif local_location == '' : raise Exception("Please input your savefile's name")
             else :
                 with open(local_location, 'w',newline='') as fh:
                     fields = list_items[0].properties.keys()
                     w = csv.DictWriter(fh, fields)
                     w.writeheader()
-                    for item in list_items:
-                        w.writerow(item.properties)
+                    for item in list_items: w.writerow(item.properties)
                 print('Download List OK')
