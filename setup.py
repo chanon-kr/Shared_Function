@@ -9,7 +9,7 @@ setuptools.setup(
     license = "MIT",	
     author="Chanon Krittapholchai",
     author_email="chanon.krittapholchai@gmail.com",
-    description="A shared function that use within my team",
+    description="simplify functions from other libraries function in 1-2 lines",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/chanon-kr/Shared_Function",
