@@ -14,6 +14,9 @@ setuptools.setup(
     url="https://github.com/chanon-kr/Shared_Function",
     packages=setuptools.find_packages(),
     classifiers=[
-        "Development Status :: 1 - Planning", "Programming Language :: Python :: 3"
-    ]
+        "Development Status :: 1 - Planning",
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License"
+    ],
+    python_requires = '>=3.7'
 )
