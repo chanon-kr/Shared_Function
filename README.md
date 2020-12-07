@@ -1,30 +1,32 @@
-# Version Control for Shared Functions used within my team
-=================================================================================================
-## data_connection
-=================================================================================================
-### sharepoint
-* <b>da_tran_SP365</b>, a class that use to interact with SharePoint365
-  - download file from SP365
-  - read csv/excel from SP365 as pandas dataframe
-  - download List as csv file from SP365
-  - read List from SP365 as pandas dataframe (Coming Soon)
-  - upload file to SP365
-  
-=================================================================================================
+# py_topping, a topping on some already great libraries
+## I create this library to make my team's projects easier and have VCS
 
+You could see samples of how to use this library inside the samples folder in github
+[Click Here](https://github.com/chanon-kr/Shared_Function)
+
+<font color='red'>I'm not provide required libraries for you because of the topping concept, 
+I don't think it's a good idea to install every libraries to everyone.</font>
+
+***
+## data_connection
+***
+### sharepoint
+  - to download file from SP365
+  - to read csv/excel from SP365 as pandas dataframe
+  - to download List as csv or pandas dataframe from SP365
+  - upload file to SP365
+
+***
 ### database
-* <b>da_tran_SQL</b>, a class that use to interact with SQL database
-  - read view or table as pandas dataframe
-  - insert pandas dataframe into SQL with option for existing row :
+  - to read view, table or store procedure as pandas dataframe
+  - to insert pandas dataframe into SQL with option for existing row :
     - Replace same key(s) with new from dataframe with option to use ">" or "<" condition
     - Add Only row with non-existing key(s)
     - Replace whole table
 
-=================================================================================================
+***
 ## general_use
 
-=================================================================================================
 ### general_use
- * <b>email_sender</b>, a class that use to send email
- 
-=================================================================================================
+  - to send email with python
+  - to logging in csv file
