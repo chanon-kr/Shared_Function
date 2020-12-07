@@ -18,7 +18,7 @@ class da_tran_SP365:
         web = self.ctx.web
         self.ctx.load(web)
         self.ctx.execute_query()
-        print('Authen to {} OK'.format(web.properties['Title']))
+        print('Authen OK')
 
     def download(self, sharepoint_location, local_location = '', as_dataframe = False, sheet_name = None) :
         """Download file from sharepoint or Read Excel/csv from sharepoint as pd dataframe"""
