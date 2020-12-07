@@ -1,10 +1,10 @@
 # py_topping, a topping on some already great libraries
 ## I create this library to make my team's projects easier and have VCS
 
-You could see samples of how to use this library inside the samples folder in github
+You could see samples of how to use this library inside the samples folder in github<br>
 [Click Here](https://github.com/chanon-kr/Shared_Function)
 
-<font color='red'>I'm not provide required libraries for you because of the topping concept, 
+<font color='red'>I'm not provide required libraries for you because of the topping concept,<br> 
 I don't think it's a good idea to install every libraries to everyone.</font>
 
 ***
