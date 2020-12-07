@@ -20,6 +20,12 @@ class da_tran_SP365:
         self.ctx.execute_query()
         print('Authen OK')
 
+    def create_link(self, file_link):
+        file_name = file_link.split('/')[-1]
+        link = '/sites' + file_link.replace(file_name,'').split('sites')[-1]
+        link += link.split('?')[0]
+        return link
+
     def download(self, sharepoint_location, local_location = '', as_dataframe = False, sheet_name = None) :
         """Download file from sharepoint or Read Excel/csv from sharepoint as pd dataframe"""
         response = File.open_binary(self.ctx, sharepoint_location ) # save file from sharepoint as binary
