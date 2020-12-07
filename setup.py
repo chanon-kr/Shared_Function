@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="py_topping",
-    version="0.1.01",
+    version="0.1.1",
     license = "MIT",	
     author="Chanon Krittapholchai",
     author_email="chanon.krittapholchai@gmail.com",
@@ -13,7 +13,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/chanon-kr/Shared_Function",
-    download_url = "https://github.com/chanon-kr/Shared_Function/archive/0.1.01.tar.gz",
+    download_url = "https://github.com/chanon-kr/Shared_Function/archive/0.1.1.tar.gz",
     keywords = ["utility"],
     packages=setuptools.find_packages(),
     classifiers=[
