@@ -9,7 +9,9 @@ class da_tran_SQL :
         sql_type = sql_type.upper()
         self.sql_type = sql_type
         type_dic = {'MSSQL' : ['mssql', 'pymssql', '1433','[',']','EXEC'],
-                    'MYSQL' : ['mysql', 'pymysql','3306','','','CALL']}
+                    'MYSQL' : ['mysql', 'pymysql','3306','','','CALL'],
+                    'POSTGRESQL' : ['postgresql', 'psycopg2','5432','"','"','SELECT * FROM ']
+                    }
                 
         if type_dic.get(sql_type,'Error') == 'Error' :
             raise Exception("Please Insert Type of your Database with these range \n{}".format(list(type_dic.keys())))
@@ -24,6 +26,7 @@ class da_tran_SQL :
     def read(self, table_name_in, condition_in = '', SP = False, param = ''):
         """Read Table or View or Store Procedure"""
         if SP :
+            if self.sql_type == 'POSTGRESQL' : return 'SP/Function None Avaliable for PostgreSQL, right now'
             sql_q = self.call_SP + ' ' + table_name_in + ' '
             if param == '' : raise Exception("Please insert SP's parameter")
             elif type(param) != dict : raise Exception("param must be dict")
@@ -31,7 +34,7 @@ class da_tran_SQL :
                 n = 0
                 for i in param.keys() :
                     if type(param[i]) == str : param[i] = """'{}'""".format(param[i])
-                    if self.sql_type in ['MYSQL'] : 
+                    if self.sql_type in ['MYSQL','POSTGRESQL'] : 
                         if n == 0 : sql_q += ' (' 
                         else : sql_q += ' , '
                         sql_q += """ {}""".format(param[i])
