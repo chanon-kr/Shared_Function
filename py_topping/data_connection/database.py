@@ -6,11 +6,15 @@ class da_tran_SQL :
     def __init__(self, sql_type, host_name, database_name, user, password , **kwargs):
         """Create connection to SQL Server"""
 
-        type_dic = {'MSSQL' : ['mssql', 'pymssql', '1433']}
-        
+        sql_type = sql_type.upper()
+        self.sql_type = sql_type
+        type_dic = {'MSSQL' : ['mssql', 'pymssql', '1433','[',']','EXEC'],
+                    'MYSQL' : ['mysql', 'pymysql','3306','','','CALL']}
+                
         if type_dic.get(sql_type,'Error') == 'Error' :
             raise Exception("Please Insert Type of your Database with these range \n{}".format(list(type_dic.keys())))
         
+        self.begin_name, self.end_name, self.call_SP = type_dic[sql_type][3], type_dic[sql_type][4], type_dic[sql_type][5]
         connection_str = str(type_dic[sql_type][0] + '+' + kwargs.get('driver',type_dic[sql_type][1])
                            + '://' + user + ':' + password + '@' + host_name
                            + ':' + kwargs.get('port',type_dic[sql_type][2]) + '/' + database_name)
@@ -20,25 +24,34 @@ class da_tran_SQL :
     def read(self, table_name_in, condition_in = '', SP = False, param = ''):
         """Read Table or View or Store Procedure"""
         if SP :
-            sql_q = """EXEC """ + table_name_in + ' '
+            sql_q = self.call_SP + ' ' + table_name_in + ' '
             if param == '' : raise Exception("Please insert SP's parameter")
             elif type(param) != dict : raise Exception("param must be dict")
             else :
                 n = 0
                 for i in param.keys() :
                     if type(param[i]) == str : param[i] = """'{}'""".format(param[i])
-                    if n > 0 : sql_q += ' , '
-                    sql_q += """ {} = {}""".format(i, param[i])
+                    if self.sql_type in ['MYSQL'] : 
+                        if n == 0 : sql_q += ' (' 
+                        else : sql_q += ' , '
+                        sql_q += """ {}""".format(param[i])
+                        if n + 1 == len(param.keys()) : sql_q += ') ' 
+                    elif self.sql_type in ['MSSQL'] : 
+                        if n > 0 : sql_q += ' , '
+                        sql_q += """ {} = {}""".format(i, param[i])
+                    else :
+                        if n > 0 : sql_q += ' , '
+                        sql_q += """ {} = {}""".format(i, param[i])
                     n += 1
         else :
-            sql_q = """SELECT * FROM [{}]""".format(table_name_in)
+            sql_q = """SELECT * FROM {}{}{}""".format(self.begin_name,table_name_in,self.end_name)
             if not condition_in == '' :
                 sql_q += """ WHERE """ + condition_in
         return pd.read_sql_query(sql_q , con = self.engine)
 
     def write_logic_sql(self, key , value_in):
         """Write SQL Condition Query that include >, <, ="""
-        logic_query = '['+ str(key) + '] ' + value_in['logic'] + ' '
+        logic_query = self.begin_name+ str(key) + self.end_name + ' ' + value_in['logic'] + ' '
         value_in['type'] = value_in.get('type','')
         if value_in.get('value','there is no value') != 'there is no value' :
             if ('date' in value_in['type']) | ('time' in value_in['type']):  # Datetime will need '' in SQL Statement
@@ -59,10 +72,10 @@ class da_tran_SQL :
         filter_filter = tuple(df_in[key].astype('str').unique())
         if len(filter_filter) == 1 : 
             filter_filter = str(filter_filter).replace(',)',')')  # tuple with 1 value will be ( x , ) => need to convert
-            logic_query = '[' + key  + ']' + ' in ' + filter_filter
+            logic_query = self.begin_name + key  + self.end_name + ' in ' + filter_filter
         elif len(filter_filter) > 1 :
             filter_filter = str(filter_filter) # tuple with > 1 values will be ( x, y, z) which can be use in SQL
-            logic_query = '[' + key  + ']' + ' in ' + filter_filter
+            logic_query = self.begin_name + key  + self.end_name + ' in ' + filter_filter
         else : logic_query = '' # Return Nothing
         return logic_query
 
@@ -124,7 +137,7 @@ class da_tran_SQL :
         if 'str' in str(type(list_key))  :
             if not list_key in df_in.columns :
                 raise Exception("{} is not in df's columns".format(list_key))       
-            sql_q = 'select distinct '+ '[' +  list_key + ']' +' from ' + table_name_in
+            sql_q = 'select distinct '+ self.begin_name +  list_key + self.end_name +' from ' + table_name_in
             filter_filter = pd.read_sql_query(sql_q, con = self.engine).iloc[:,0]
             logic_filter = ~df_in[list_key].isin(filter_filter)
 
@@ -139,7 +152,7 @@ class da_tran_SQL :
                 filter_name = list_key[i]
                 if i != 0 : sql_q += ' , '
                 df_in['key_sql_filter'] = df_in['key_sql_filter'].astype('str') + df_in[filter_name].astype('str')
-                sql_q += '[' +  filter_name + '] ' 
+                sql_q += self.begin_name +  filter_name + self.end_name + ' ' 
                 i += 1
             sql_q += ' FROM ' + table_name_in
             if debug : print(sql_q)
@@ -172,7 +185,7 @@ class da_tran_SQL :
         if 'str' in str(type(list_key))  :
             if not list_key in df_in.columns :
                 raise Exception("{} is not in df's columns".format(list_key))       
-            sql_q = 'select distinct '+ '[' +  list_key + ']' +' from ' + table_name_in
+            sql_q = 'select distinct '+ self.begin_name +  list_key + self.end_name +' from ' + table_name_in
             filter_filter = pd.read_sql_query(sql_q, con = self.engine).iloc[:,0]
             logic_filter = ~df_in[list_key].isin(filter_filter)
 
@@ -183,7 +196,7 @@ class da_tran_SQL :
             i = 0
             while i < len(list_key) :
                 filter_name = list_key[i]
-                sql_q = 'select distinct '+ '[' +  filter_name + ']' +' from ' + table_name_in
+                sql_q = 'select distinct '+ self.begin_name +  filter_name + self.end_name +' from ' + table_name_in
                 filter_filter = pd.read_sql_query(sql_q, con = self.engine).iloc[:,0]
                 if i == 0 : logic_filter = df_in[filter_name].isin(filter_filter)
                 else : logic_filter = (logic_filter) & (df_in[filter_name].isin(filter_filter))
