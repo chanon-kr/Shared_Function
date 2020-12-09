@@ -10,8 +10,8 @@ pip install git+https://github.com/chanon-kr/Shared_Function.git
 ```
 <br>
 You could see samples of how to use this library inside the samples folder in github<br>
-[Click Here](https://github.com/chanon-kr/Shared_Function)
-
+(https://github.com/chanon-kr/Shared_Function)
+<br><br>
 I'm not provide required libraries for you because of the topping concept,<br> 
 I don't think it's a good idea to install every libraries to everyone.
 
