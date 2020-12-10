@@ -28,15 +28,18 @@ I don't think it's a good idea to install every libraries for everyone.
 
 ***
 ### database
-  - to read view, table or store procedure as pandas dataframe
+  - Work with SQL Server, MySQL and PostGreSQL
+  - to read view, table or store procedure as pandas dataframe 
   - to insert pandas dataframe into SQL with option for existing row :
     - Replace same key(s) with new from dataframe with option to use ">" or "<" condition
     - Add Only row with non-existing key(s)
     - Replace whole table
+  - Can't read Store Procedure in PostGreSQL, will solve this in later version
+  - Will working with Oracle Database in later version
 
 ***
 ## general_use
-
+***
 ### general_use
   - to send email with python
   - to logging in csv file
