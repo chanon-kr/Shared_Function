@@ -1,5 +1,7 @@
 # py_topping, a topping on some already great libraries
 ## I create this library to make my team's projects easier and have VCS
+<br>
+PyPi Project Page : (https://pypi.org/project/py-topping)
 <br>To Install a Stable Version
 ```python
 pip install py-topping
@@ -19,10 +21,10 @@ I don't think it's a good idea to install every libraries to everyone.
 ## data_connection
 ***
 ### sharepoint
-  - to download file from SP365
+  - to download file from SP365 or SP on prim
   - to read csv/excel from SP365 as pandas dataframe
   - to download List as csv or pandas dataframe from SP365
-  - upload file to SP365
+  - upload file to SP365 or SP on prim
 
 ***
 ### database
