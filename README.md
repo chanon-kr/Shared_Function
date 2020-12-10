@@ -2,11 +2,11 @@
 ## I create this library to make my team's projects easier and have VCS
 <br>
 PyPi Project Page : (https://pypi.org/project/py-topping)
-<br>To Install a Stable Version
+<br>To Install a Stable Version<br>
 ```python
 pip install py-topping
 ```
-<br>To Install a Newest Version
+<br>To Install a Newest Version<br>
 ```python
 pip install git+https://github.com/chanon-kr/Shared_Function.git
 ```
