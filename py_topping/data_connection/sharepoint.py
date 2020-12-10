@@ -1,11 +1,35 @@
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.files.file import File
-import os
-import csv
+import os, csv, requests
 from io import BytesIO
 import pandas as pd
 
+class da_tran_SP_PRIM:
+    def __init__(self, user,password) :
+        self.user = user
+        self.password = password
+
+    def download(self,download_url,local_location):
+        resp=requests.post(download_url, auth=requests.auth.HTTPBasicAuth(self.user, self.password))
+        with open(local_location, 'wb') as output :
+           output.write(resp.content)
+
+    def upload(self, local_location, sharepoint_url, sharepoint_folder, sharepoint_file_name = ''):
+        with open(local_location, 'rb') as file :
+            if sharepoint_file_name == '' : sharepoint_file_name = local_location
+            #Sets up the url for requesting a file upload
+            requestUrl = sharepoint_url + '/_api/web/getfolderbyserverrelativeurl(\'' + sharepoint_folder + '\')/Files/add(url=\'' + sharepoint_file_name + '\',overwrite=true)'
+            #Setup the required headers for communicating with SharePoint 
+            headers = {'Content-Type': 'application/json; odata=verbose', 'accept': 'application/json;odata=verbose'}
+            #Execute a request to get the FormDigestValue. This will be used to authenticate our upload request
+            r = requests.post(sharepoint_url + "/_api/contextinfo",auth=requests.auth.HTTPBasicAuth(self.user, self.password), headers=headers)
+            formDigestValue = r.json()['d']['GetContextWebInformation']['FormDigestValue']
+            #Update headers to use the newly acquired FormDigestValue
+            headers = {'Content-Type': 'application/json; odata=verbose', 'accept': 'application/json;odata=verbose', 'x-requestdigest' : formDigestValue}
+            #Execute the request. If you run into issues, inspect the contents of uploadResult
+            requests.post(requestUrl,auth=requests.auth.HTTPBasicAuth(self.user, self.password), data=file.read(),headers=headers)
+    
 class da_tran_SP365:
     def __init__(self, site_url, client_id, client_secret):
         """Create connection to Sharepoint Site"""
