@@ -3,6 +3,13 @@ import setuptools
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+requirements = [
+                "pymssql == 2.1.4",
+                "Office365-REST-Python-Client",
+                "SQLAlchemy",
+                "pandas >= 1" , "requests"
+              ]
+
 setuptools.setup(
     name="py_topping",
     version="0.1.4",
@@ -21,11 +28,6 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License"
     ],
-    requires = [
-                "pymssql == 2.1.4",
-                "Office365-REST-Python-Client",
-                "SQLAlchemy",
-                "pandas >= 1" , "requests"
-              ],
+    install_requires= requirements ,
     python_requires = '>=3.7'
 )
