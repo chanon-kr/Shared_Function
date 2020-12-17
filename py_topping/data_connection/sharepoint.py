@@ -1,5 +1,5 @@
 from office365.runtime.auth.authentication_context import AuthenticationContext
-from office365.sharepoint.client_context import ClientContext
+from office365.sharepoint.client_context import ClientContext, UserCredential
 from office365.sharepoint.files.file import File
 import os, csv, requests
 from io import BytesIO
@@ -31,13 +31,19 @@ class da_tran_SP_PRIM:
             requests.post(requestUrl,auth=requests.auth.HTTPBasicAuth(self.user, self.password), data=file.read(),headers=headers)
     
 class da_tran_SP365:
-    def __init__(self, site_url, client_id, client_secret):
+    def __init__(self, site_url, client_id = '', client_secret = '', user = '' , password = ''):
         """Create connection to Sharepoint Site"""
         self.site_url = site_url
-        self.client_id = client_id
-        self.client_secret = client_secret
-        ctx_auth = AuthenticationContext( self.site_url)
-        ctx_auth.acquire_token_for_app( self.client_id , self.client_secret )
+        if (client_id != '') & (client_secret != '') :
+            self.client_id = client_id
+            self.client_secret = client_secret
+            ctx_auth = AuthenticationContext( self.site_url)
+            ctx_auth.acquire_token_for_app( self.client_id , self.client_secret )
+        elif (user != '') & (password != '') :
+            self.user = user
+            user_credentials = UserCredential(user,password)
+            ctx_auth = ClientContext(self.site_url).with_credentials(user_credentials)
+        else : raise Exception("Please Insert parameters : 'client_id' and 'client_secret' or 'user' and 'password'")
         self.ctx = ClientContext(self.site_url, ctx_auth)
         web = self.ctx.web
         self.ctx.load(web)
