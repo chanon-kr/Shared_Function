@@ -21,5 +21,11 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License"
     ],
+    requires = [
+                "pymssql == 2.1.4",
+                "Office365-REST-Python-Client",
+                "SQLAlchemy",
+                "pandas >= 1" , "requests"
+              ],
     python_requires = '>=3.7'
 )
