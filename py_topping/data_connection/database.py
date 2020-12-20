@@ -3,11 +3,12 @@ from sqlalchemy import create_engine
 
 class da_tran_SQL :
     """interact with SQL"""
-    def __init__(self, sql_type, host_name, database_name, user, password , **kwargs):
+    def __init__(self, sql_type, host_name, database_name, user, password , chunksize = 150,  **kwargs):
         """Create connection to SQL Server"""
 
         sql_type = sql_type.upper()
         self.sql_type = sql_type
+        self.chunksize = chunksize
         type_dic = {'MSSQL' : ['mssql', 'pymssql', '1433','[',']','EXEC'],
                     'MYSQL' : ['mysql', 'pymysql','3306','','','CALL'],
                     'POSTGRESQL' : ['postgresql', 'psycopg2','5432','"','"','SELECT * FROM ']
@@ -69,12 +70,12 @@ class da_tran_SQL :
             print('Start Filter Existing data from df at ',pd.Timestamp.now())
             self.engine.execute("""DELETE FROM [{}]""".format(table_name_in))
             #Dump df_in to database
-            df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'append',chunksize = 150, method = 'multi')
+            df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'append',chunksize = self.chunksize, method = 'multi')
             print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
         else :
             print('Start Filter Existing data from df at ',pd.Timestamp.now())
             #Dump df_in to database
-            df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'replace',chunksize = 150, method = 'multi')
+            df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'replace',chunksize = self.chunksize, method = 'multi')
             print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
 
     def write_in_sql(self,df_in , key) :
@@ -136,7 +137,7 @@ class da_tran_SQL :
             
         if debug : print(sql_q)
         #Dump df_in append to database
-        df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'append',chunksize = 150, method = 'multi')
+        df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'append',chunksize = self.chunksize, method = 'multi')
         print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
 
     def dump_new(self, df_in, table_name_in, list_key , debug = False) :
@@ -184,7 +185,7 @@ class da_tran_SQL :
         df_in = df_in[logic_filter]
 
         #Dump df_in append to database
-        df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'append',chunksize = 150, method = 'multi')
+        df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'append',chunksize = self.chunksize, method = 'multi')
         print('Dump data to ',table_name_in,' End ', pd.Timestamp.now())
 
     def dump_new_old(self, df_in, table_name_in, list_key) :
@@ -221,5 +222,5 @@ class da_tran_SQL :
         df_in = df_in[logic_filter]
 
         #Dump df_in append to database
-        df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'append',chunksize = 150, method = 'multi')
+        df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'append',chunksize = self.chunksize, method = 'multi')
         print('Dump data to ',table_name_in,' End ', pd.Timestamp.now())
