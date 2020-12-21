@@ -9,7 +9,8 @@ class da_tran_SQL :
         sql_type = sql_type.upper()
         self.sql_type = sql_type
         self.chunksize = chunksize
-        type_dic = {'MSSQL' : ['mssql', 'pymssql', '1433','[',']','EXEC'],
+        type_dic = {
+                    'MSSQL' : ['mssql', 'pymssql', '1433','[',']','EXEC'],
                     'MYSQL' : ['mysql', 'pymysql','3306','','','CALL'],
                     'POSTGRESQL' : ['postgresql', 'psycopg2','5432','"','"','SELECT * FROM ']
                     }
@@ -66,7 +67,7 @@ class da_tran_SQL :
 
     def dump_whole(self, df_in, table_name_in , fix_table = False, debug = False) :
         """Delete exists table and replace with new df"""
-        if fix_table : # NOT TEST YET
+        if fix_table : 
             print('Start Filter Existing data from df at ',pd.Timestamp.now())
             self.engine.execute("""DELETE FROM [{}]""".format(table_name_in))
             #Dump df_in to database
