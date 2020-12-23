@@ -1,13 +1,13 @@
 import email, smtplib, ssl
 from email import encoders
+from email.message import EmailMessage
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
+import mimetypes
 from datetime import datetime
-import os
-import csv
-import re
+import os , csv , re
 
 class email_sender :
     def __init__(self, user, password, servername):
@@ -31,27 +31,50 @@ class email_sender :
             #Quit if error
             smtpObj.quit()
             return str(e)
-        
-    def send_email(self, sendto,subject,text_in):
+
+    def add_file(self, message, attachment_path) :
+        if os.path.exists(attachment_path):    
+            with open(attachment_path, "rb") as attachment:
+                # Add file as application/octet-stream
+                # Email client can usually download this automatically as attachment
+                base_attach = MIMEBase("application", "octet-stream")
+                base_attach.set_payload(attachment.read())
+            # Encode file in ASCII characters to send by email    
+            encoders.encode_base64(base_attach)
+            # Add header as key/value pair to attachment part
+            base_attach.add_header(
+                "Content-Disposition",
+                f"attachment; filename= "+ attachment_path.split('/')[-1],)        
+            # Add attachment to message and convert message to string
+            message.attach(base_attach)
+        return message
+
+    def send(self, sendto,subject,text_in , attachment = None):
         """Create Message Part"""
         #split for multple
         recipients = sendto.split(";")
 
         #Create Head of Email
         message = MIMEMultipart()
+        #message = EmailMessage()
         message["From"] = self.sender
         message["To"] =  ', '.join(recipients)
         message["Subject"] = subject
 
         #Create Message Part
         html = """<html><body><p>{}</p></body></html>""".format(text_in)
-
         #Attach before send
         partHTML = MIMEText(html, 'html')
         message.attach(partHTML)
 
+        if attachment == None : pass
+        elif type(attachment) != list : raise Exception("attachment must be a list")
+        else : 
+            for i in attachment : 
+                message = self.add_file(message , i)
         #Sending Email and return status text
         return self.executor(recipients, message)
+
 
 def log_csv(file_name,msg_in):
     logic = True
