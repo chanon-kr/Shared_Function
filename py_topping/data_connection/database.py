@@ -81,7 +81,7 @@ class da_tran_SQL :
 
     def write_in_sql(self,df_in , key) :
         """Write SQL Condition Query 'in (x,x,x)'"""
-        filter_filter = tuple(df_in[key].astype('str').unique())
+        filter_filter = tuple(df_in[key].fillna('Will BE rEpLaCe wItH NULL').astype('str').unique())
         if len(filter_filter) == 1 : 
             filter_filter = str(filter_filter).replace(',)',')')  # tuple with 1 value will be ( x , ) => need to convert
             logic_query = self.begin_name + key  + self.end_name + ' in ' + filter_filter
@@ -89,6 +89,11 @@ class da_tran_SQL :
             filter_filter = str(filter_filter) # tuple with > 1 values will be ( x, y, z) which can be use in SQL
             logic_query = self.begin_name + key  + self.end_name + ' in ' + filter_filter
         else : logic_query = '' # Return Nothing
+
+        if "'Will BE rEpLaCe wItH NULL'" in logic_query :
+            logic_query = logic_query.replace("'Will BE rEpLaCe wItH NULL',",'')
+            logic_query = '(' + logic_query + ' OR {}{}{} IS NULL'.format(self.begin_name , key, self.end_name) + ')'
+
         return logic_query
 
     def dump_replace(self, df_in, table_name_in, list_key, math_logic = '',debug = False):
