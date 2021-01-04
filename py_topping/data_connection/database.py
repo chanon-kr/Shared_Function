@@ -83,7 +83,7 @@ class da_tran_SQL :
         """Write SQL Condition Query 'in (x,x,x)'"""
         filter_filter = tuple(df_in[key].fillna('Will BE rEpLaCe wItH NULL').astype('str').unique())
         if len(filter_filter) == 1 : 
-            if 'Will BE rEpLaCe wItH NULL' in logic_query :
+            if 'Will BE rEpLaCe wItH NULL' in filter_filter :
                 logic_query = '({}{}{} IS NULL'.format(self.begin_name , key, self.end_name) + ')'
             else :
                 filter_filter = str(filter_filter).replace(',)',')')  # tuple with 1 value will be ( x , ) => need to convert
