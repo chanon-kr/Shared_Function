@@ -94,6 +94,8 @@ class da_tran_SQL :
             #print(logic_query)
             logic_query = logic_query.replace(", 'Will BE rEpLaCe wItH NULL'",'')
             #print(logic_query)
+            logic_query = logic_query.replace("'Will BE rEpLaCe wItH NULL',",'')
+            logic_query = logic_query.replace("'Will BE rEpLaCe wItH NULL'",'')
             logic_query = '(' + logic_query + ' OR {}{}{} IS NULL'.format(self.begin_name , key, self.end_name) + ')'
 
         return logic_query
