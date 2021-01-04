@@ -89,11 +89,11 @@ class da_tran_SQL :
             filter_filter = str(filter_filter) # tuple with > 1 values will be ( x, y, z) which can be use in SQL
             logic_query = self.begin_name + key  + self.end_name + ' in ' + filter_filter
         else : logic_query = '' # Return Nothing
-        print(logic_query)
+        #print(logic_query)
         if "'Will BE rEpLaCe wItH NULL'" in logic_query :
-            print(logic_query)
+            #print(logic_query)
             logic_query = logic_query.replace(", 'Will BE rEpLaCe wItH NULL'",'')
-            print(logic_query)
+            #print(logic_query)
             logic_query = '(' + logic_query + ' OR {}{}{} IS NULL'.format(self.begin_name , key, self.end_name) + ')'
 
         return logic_query
