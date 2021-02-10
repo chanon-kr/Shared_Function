@@ -39,16 +39,18 @@ class da_tran_SQL :
 
     def dump_main(self, df_in, table_name_in ,mode_in) :
         """Divide and Dump Dataframe"""
-        if self.parallel_dump : dask_dump = delayed(self.sub_dump)
-        i, j, sum_len, df_length = 0, 1, 0, len(df_in)
-        while i < df_length :
-            i_next = i + self.slicer_size
-            if self.parallel_dump :
-                sum_len += dask_dump(df_in.loc[i:i_next,:],table_name_in,mode_in) 
-                if (j == self.max_parallel) | (i_next >= df_length) : sum_len, j = sum_len.compute(), 1
-            else : sum_len += self.sub_dump(df_in.loc[i:i_next,:],table_name_in,mode_in) 
-            j += 1
-            i += self.slicer_size
+        if len(df_in) <= self.slicer_size : sum_len = self.sub_dump(df_in,table_name_in,mode_in) 
+        else :
+            if self.parallel_dump : dask_dump = delayed(self.sub_dump)
+            i, j, sum_len, df_length = 0, 1, 0, len(df_in)
+            while i < df_length :
+                i_next = i + self.slicer_size
+                if self.parallel_dump :
+                    sum_len += dask_dump(df_in.iloc[i:i_next,:],table_name_in,mode_in) 
+                    if (j == self.max_parallel) | (i_next >= df_length) : sum_len, j = sum_len.compute(), 1
+                else : sum_len += self.sub_dump(df_in.iloc[i:i_next,:],table_name_in,mode_in) 
+                j += 1
+                i += self.slicer_size
         return sum_len
 
 
