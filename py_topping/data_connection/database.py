@@ -3,12 +3,16 @@ from sqlalchemy import create_engine
 
 class da_tran_SQL :
     """interact with SQL"""
-    def __init__(self, sql_type, host_name, database_name, user, password , chunksize = 150,  **kwargs):
+    def __init__(self, sql_type, host_name, database_name, user, password 
+                , chunksize = 150, slicer_size = 5000, parallel_dump = False, maximum_parallel = 2, **kwargs):
         """Create connection to SQL Server"""
-
         sql_type = sql_type.upper()
         self.sql_type = sql_type
         self.chunksize = chunksize
+        self.slicer_size = slicer_size
+        self.parallel_dump = parallel_dump
+        self.maximum_parallel = maximum_parallel
+
         type_dic = {
                     'MSSQL' : ['mssql', 'pymssql', '1433','[',']','EXEC'],
                     'MYSQL' : ['mysql', 'pymysql','3306','','','CALL'],
