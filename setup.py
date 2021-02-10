@@ -5,9 +5,9 @@ with open("README.md", "r") as fh:
 
 requirements = [
                 "pymssql == 2.1.4",
-                "Office365-REST-Python-Client",
-                "SQLAlchemy",
-                "pandas >= 1" , "requests"
+                "Office365-REST-Python-Client"
+#                ,"SQLAlchemy"
+#                ,"pandas >= 1" , "requests"
               ]
 
 setuptools.setup(
