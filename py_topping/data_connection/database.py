@@ -5,12 +5,12 @@ from dask import delayed
 class da_tran_SQL :
     """interact with SQL"""
     def __init__(self, sql_type, host_name, database_name, user, password 
-                , chunksize = 150, slicer_size = 5000, parallel_dump = False, max_parallel = 2, **kwargs):
+                , chunksize = 150, partition_size = 5000, parallel_dump = False, max_parallel = 2, **kwargs):
         """Create connection to SQL Server"""
         sql_type = sql_type.upper()
         self.sql_type = sql_type
         self.chunksize = int(chunksize)
-        self.slicer_size = int(slicer_size)
+        self.partition_size = int(partition_size)
         self.parallel_dump = parallel_dump
         self.max_parallel = int(max_parallel)
 
@@ -39,18 +39,18 @@ class da_tran_SQL :
 
     def dump_main(self, df_in, table_name_in ,mode_in) :
         """Divide and Dump Dataframe"""
-        if len(df_in) <= self.slicer_size : sum_len = self.sub_dump(df_in,table_name_in,mode_in) 
+        if len(df_in) <= self.partition_size : sum_len = self.sub_dump(df_in,table_name_in,mode_in) 
         else :
             if self.parallel_dump : dask_dump = delayed(self.sub_dump)
             i, j, sum_len, df_length = 0, 1, 0, len(df_in)
             while i < df_length :
-                i_next = i + self.slicer_size
+                i_next = i + self.partition_size
                 if self.parallel_dump :
                     sum_len += dask_dump(df_in.iloc[i:i_next,:],table_name_in,mode_in) 
                     if (j == self.max_parallel) | (i_next >= df_length) : sum_len, j = sum_len.compute(), 1
                 else : sum_len += self.sub_dump(df_in.iloc[i:i_next,:],table_name_in,mode_in) 
                 j += 1
-                i += self.slicer_size
+                i += self.partition_size
         return sum_len
 
 
@@ -85,12 +85,15 @@ class da_tran_SQL :
 
     def write_logic_sql(self, key , value_in):
         """Write SQL Condition Query that include >, <, ="""
-        logic_query = self.begin_name+ str(key) + self.end_name + ' ' + value_in['logic'] + ' '
+        #logic_query = self.begin_name+ str(key) + self.end_name + ' ' + value_in['logic'] + ' '
         value_in['type'] = value_in.get('type','')
         if value_in.get('value','there is no value') != 'there is no value' :
             if ('date' in value_in['type']) | ('time' in value_in['type']):  # Datetime will need '' in SQL Statement
+                logic_query = 'CAST(' + self.begin_name+ str(key) + self.end_name + ' AS {}) '.format(value_in['type']) + value_in['logic'] + ' '
                 logic_query += """'""" + str(value_in['value']) + """'"""
-            else : logic_query += str(value_in['value'])
+            else : 
+                logic_query = self.begin_name+ str(key) + self.end_name + ' ' + value_in['logic'] + ' ' + str(value_in['value'])
+#                logic_query += 
         else : raise Exception("Please insert value data")  # will get error if not specific value
         return logic_query
 
@@ -106,8 +109,8 @@ class da_tran_SQL :
         else :
             print('Start Filter Existing data from df at ',pd.Timestamp.now())
             #Dump df_in to database
-            #df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'replace',chunksize = self.chunksize, method = 'multi')
-            self.dump_main( df_in, table_name_in ,mode_in = 'replace') 
+            df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'replace',chunksize = self.chunksize, method = 'multi')
+            #self.dump_main( df_in, table_name_in ,mode_in = 'replace') 
             print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
 
     def write_in_sql(self,df_in , key) :
