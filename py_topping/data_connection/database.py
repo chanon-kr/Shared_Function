@@ -5,14 +5,14 @@ from dask import delayed
 class da_tran_SQL :
     """interact with SQL"""
     def __init__(self, sql_type, host_name, database_name, user, password 
-                , chunksize = 150, slicer_size = 5000, parallel_dump = False, maximum_parallel = 2, **kwargs):
+                , chunksize = 150, slicer_size = 5000, parallel_dump = False, max_parallel = 2, **kwargs):
         """Create connection to SQL Server"""
         sql_type = sql_type.upper()
         self.sql_type = sql_type
-        self.chunksize = chunksize
-        self.slicer_size = slicer_size
+        self.chunksize = int(chunksize)
+        self.slicer_size = int(slicer_size)
         self.parallel_dump = parallel_dump
-        self.maximum_parallel = maximum_parallel
+        self.max_parallel = int(max_parallel)
 
         type_dic = {
                     'MSSQL' : ['mssql', 'pymssql', '1433','[',']','EXEC'],
@@ -31,7 +31,7 @@ class da_tran_SQL :
         print(pd.read_sql_query("""SELECT 'Connection OK'""", con = self.engine).iloc[0,0]) 
 
     def sub_dump(self, df_in,table_name_in,mode_in) :
-        """Dump"""
+        """normal to_sql for dask's delayed in dump_main"""
         try :
             df_in.to_sql(table_name_in, con = self.engine, index = False,if_exists = mode_in,chunksize = self.chunksize, method = 'multi')
             return len(df_in)
@@ -45,7 +45,7 @@ class da_tran_SQL :
             i_next = i + self.slicer_size
             if self.parallel_dump :
                 sum_len += dask_dump(df_in.loc[i:i_next,:],table_name_in,mode_in) 
-                if (j == self.maximum_parallel) | (i_next >= df_length) : sum_len, j = sum_len.compute(), 1
+                if (j == self.max_parallel) | (i_next >= df_length) : sum_len, j = sum_len.compute(), 1
             else : sum_len += self.sub_dump(df_in.loc[i:i_next,:],table_name_in,mode_in) 
             j += 1
             i += self.slicer_size
@@ -98,12 +98,14 @@ class da_tran_SQL :
             print('Start Filter Existing data from df at ',pd.Timestamp.now())
             self.engine.execute("""DELETE FROM [{}]""".format(table_name_in))
             #Dump df_in to database
-            df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'append',chunksize = self.chunksize, method = 'multi')
+            #df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'append',chunksize = self.chunksize, method = 'multi')
+            self.dump_main( df_in, table_name_in ,mode_in = 'append') 
             print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
         else :
             print('Start Filter Existing data from df at ',pd.Timestamp.now())
             #Dump df_in to database
-            df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'replace',chunksize = self.chunksize, method = 'multi')
+            #df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'replace',chunksize = self.chunksize, method = 'multi')
+            self.dump_main( df_in, table_name_in ,mode_in = 'replace') 
             print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
 
     def write_in_sql(self,df_in , key) :
@@ -226,7 +228,8 @@ class da_tran_SQL :
         df_in = df_in[logic_filter]
 
         #Dump df_in append to database
-        df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'append',chunksize = self.chunksize, method = 'multi')
+        #df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'append',chunksize = self.chunksize, method = 'multi')
+        self.dump_main( df_in, table_name_in ,mode_in = 'append') 
         print('Dump data to ',table_name_in,' End ', pd.Timestamp.now())
 
     def dump_new_old(self, df_in, table_name_in, list_key) :
@@ -263,5 +266,6 @@ class da_tran_SQL :
         df_in = df_in[logic_filter]
 
         #Dump df_in append to database
-        df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'append',chunksize = self.chunksize, method = 'multi')
+        #df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'append',chunksize = self.chunksize, method = 'multi')
+        self.dump_main(df_in, table_name_in ,mode_in = 'append')
         print('Dump data to ',table_name_in,' End ', pd.Timestamp.now())
