@@ -1,5 +1,6 @@
 import pandas as pd
 from sqlalchemy import create_engine
+from dask import delayed
 
 class da_tran_SQL :
     """interact with SQL"""
@@ -28,6 +29,28 @@ class da_tran_SQL :
                            + ':' + kwargs.get('port',type_dic[sql_type][2]) + '/' + database_name)
         self.engine = create_engine(connection_str)
         print(pd.read_sql_query("""SELECT 'Connection OK'""", con = self.engine).iloc[0,0]) 
+
+    def sub_dump(self, df_in,table_name_in,mode_in) :
+        """Dump"""
+        try :
+            df_in.to_sql(table_name_in, con = self.engine, index = False,if_exists = mode_in,chunksize = self.chunksize, method = 'multi')
+            return len(df_in)
+        except : return 0
+
+    def dump_main(self, df_in, table_name_in ,mode_in) :
+        """Divide and Dump Dataframe"""
+        if self.parallel_dump : dask_dump = delayed(self.sub_dump)
+        i, j, sum_len, df_length = 0, 1, 0, len(df_in)
+        while i < df_length :
+            i_next = i + self.slicer_size
+            if self.parallel_dump :
+                sum_len += dask_dump(df_in.loc[i:i_next,:],table_name_in,mode_in) 
+                if (j == self.maximum_parallel) | (i_next >= df_length) : sum_len, j = sum_len.compute(), 1
+            else : sum_len += self.sub_dump(df_in.loc[i:i_next,:],table_name_in,mode_in) 
+            j += 1
+            i += self.slicer_size
+        return sum_len
+
 
     def read(self, table_name_in, condition_in = '', SP = False, param = ''):
         """Read Table or View or Store Procedure"""
@@ -154,7 +177,8 @@ class da_tran_SQL :
             
         if debug : print(sql_q)
         #Dump df_in append to database
-        df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'append',chunksize = self.chunksize, method = 'multi')
+        #df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'append',chunksize = self.chunksize, method = 'multi')
+        self.dump_main(df_in, table_name_in ,mode_in = 'append')
         print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
 
     def dump_new(self, df_in, table_name_in, list_key , debug = False) :
