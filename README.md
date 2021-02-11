@@ -27,11 +27,12 @@ You could see samples of how to use this library inside the samples folder in gi
 ***
 ### database
   - Work with SQL Server, MySQL and PostGreSQL
-  - to read view, table or store procedure as pandas dataframe 
-  - to insert pandas dataframe into SQL with option for existing row :
+  - To read view, table or store procedure as pandas dataframe 
+  - To insert pandas dataframe into SQL with option for existing row :
     - Replace same key(s) with new from dataframe with option to use ">" or "<" condition
     - Add Only row with non-existing key(s)
     - Replace whole table
+  - Can parallel insert by using dask's delayed
   - Can't read Store Procedure in PostGreSQL, will solve this in later version
   - Will working with Oracle Database in later version
 
@@ -39,5 +40,5 @@ You could see samples of how to use this library inside the samples folder in gi
 ## general_use
 ***
 ### general_use
-  - to send email with python
-  - to logging in csv file
+  - To send email with python
+  - To logging in csv file
