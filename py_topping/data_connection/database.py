@@ -32,10 +32,8 @@ class da_tran_SQL :
 
     def sub_dump(self, df_in,table_name_in,mode_in) :
         """normal to_sql for dask's delayed in dump_main"""
-        try :
-            df_in.to_sql(table_name_in, con = self.engine, index = False,if_exists = mode_in,chunksize = self.chunksize, method = 'multi')
-            return len(df_in)
-        except : return 0
+        df_in.to_sql(table_name_in, con = self.engine, index = False,if_exists = mode_in,chunksize = self.chunksize, method = 'multi')
+        return len(df_in)
 
     def dump_main(self, df_in, table_name_in ,mode_in) :
         """Divide and Dump Dataframe"""
