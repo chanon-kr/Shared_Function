@@ -40,18 +40,25 @@ def run_pipeline(script_list , out_folder = '', out_prefix = None): #, email_sen
   
   return pd.DataFrame(logs_out, columns = ['start','script','notebook_out','run_result','end'])
 
-#  email_sender.send(email_sendto,email_subject,run_output, attachment= attached)
+def run_with_email(script_list, out_folder = '', out_prefix = None, email_dict = {} , sending = True
+                    , only_error = False, notebook_attached = False, attached_only_error = True, attached_log = False, log_sql = None) :
 
-def run_with_email(script_list, out_folder = '', out_prefix = None, email_dict = {}
-                    , only_error = False, notebook_attached = False, attached_only_error = True, attached_log = False) :
+    if sending :
+        if ['user' , 'password', 'server' ,'sendto','subject'].sort() != list(email_dict.keys()).sort() :
+            raise Exception("email_dict parameter must have 'user' , 'password' , 'server' , 'sendto' , 'subject' ")
 
-    if ['user' , 'password', 'server' ,'sendto','subject'].sort() != list(email_dict.keys()).sort() :
-        raise Exception("email_dict must have 'user' , 'password' , 'server' , 'sendto' , 'subject' ")
+        run_output = 'Start Job at ' + str(datetime.now()) + '<br>' + '<br>'
 
-    run_output = 'Start Job at ' + str(datetime.now()) + '<br>' + '<br>'
     run_log = run_pipeline(script_list , out_folder, out_prefix )
 
-    sending = True
+    if log_sql != None : 
+        if ['job_name','table_name' , 'da_tran_SQL'].sort() != list(log_sql.keys()).sort() :
+            raise Exception("log_sql parameter must have 'job_name','table_name' , 'da_tran_SQL' ")
+        run_log['job_name'] = log_sql['job_name']
+        run_log.astype('str').to_sql(log_sql['table_name'], con = log_sql['da_tran_SQL'].engine , if_exists = 'append', index = False)
+        run_log = run_log.drop(['job_name'], axis = 1)
+        
+
     if only_error  : 
         if (run_log['run_result'] != 'OK').sum() == 0 : sending = False
         else : run_log = run_log[(run_log['run_result'] != 'OK')]
