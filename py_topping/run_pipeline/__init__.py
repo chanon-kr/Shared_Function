@@ -75,7 +75,7 @@ def run_with_email(script_list, out_folder = '', out_prefix = None, email_dict =
         run_output += run_log[['script','start','end','run_result']].to_html(index = False)
         email_subject = email_dict['subject'] + ' ' + str(datetime.now())
         em = email_sender(email_dict['user'] , email_dict['password'] , email_dict['server'])
-        em.send(email_dict['sendto'] , email_dict['subject'] , run_output , attachment= attached)
+        em.send(email_dict['sendto'] , email_subject , run_output , attachment= attached)
 
     if attached_log : os.remove(file_name)
 
