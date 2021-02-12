@@ -47,7 +47,7 @@ You could see samples of how to use this library inside the samples folder in gi
 ## run_pipeline
 ***
 ### run_pipeline
-  - to run your python or notebook script 
+  - to run your python or notebook scripts 
     - with logging as a csv
     - with logging into sql table
     - with emailing the log when have/don't have errors
