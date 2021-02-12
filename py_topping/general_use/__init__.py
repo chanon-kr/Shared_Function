@@ -7,7 +7,7 @@ from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 import mimetypes
 from datetime import datetime
-import os , csv , re
+import os , csv , re, socket
 
 class email_sender :
     def __init__(self, user, password, servername):
@@ -89,3 +89,16 @@ def log_csv(file_name,msg_in):
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         if logic : writer.writeheader()
         writer.writerow({'Timestamp':str(datetime.now()),'msg':msg_in})
+
+def check_port(ip = None, port = None):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    if ip == None : ip = input("Please Input IP :")
+    if port == None : port = input("Please Input port :")
+
+    location = (str(ip), int(port))
+    r = sock.connect_ex(location)
+    if r == 0:
+        print("Port is open")
+    else:
+        print("Port is not open")
