@@ -12,7 +12,7 @@ requirements = [
 
 setuptools.setup(
     name="py_topping",
-    version="0.1.11",
+    version="0.2.1",
     license = "MIT",	
     author="Chanon Krittapholchai",
     author_email="chanon.krittapholchai@gmail.com",
@@ -20,11 +20,11 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/chanon-kr/Shared_Function",
-    download_url = "https://github.com/chanon-kr/Shared_Function/archive/0.1.10.tar.gz",
+    download_url = "https://github.com/chanon-kr/Shared_Function/archive/0.2.1.tar.gz",
     keywords = ["utility"],
     packages=setuptools.find_packages(),
     classifiers=[
-        "Development Status :: 1 - Planning",
+        "Development Status :: 3 - Alpha",
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License"
     ],
