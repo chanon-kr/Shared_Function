@@ -80,7 +80,7 @@ def run_pipeline(script_list, out_folder = '', out_prefix = None, email_dict = {
 
     if sending :
         run_output += run_log[['script','start','end','run_result']].to_html(index = False)
-        run_output = run_output.replace('\n','<br>')
+        run_output = run_output.replace('\\n','<br>')
         email_subject = email_dict['subject'] + ' ' + str(datetime.now())
         em = email_sender(email_dict['user'] , email_dict['password'] , email_dict['server'])
         em.send(email_dict['sendto'] , email_subject , run_output , attachment= attached)
