@@ -5,7 +5,7 @@ import papermill as pm
 import pandas as pd
 from py_topping.general_use import email_sender
 
-def run_pipeline(script_list , out_folder = '', out_prefix = None): #, email_sender, email_sendto,email_subject ,run_output , ) :
+def run_script(script_list , out_folder = '', out_prefix = None): #, email_sender, email_sendto,email_subject ,run_output , ) :
   logs_out = []
 
   # Create Directory if not exists
@@ -40,7 +40,7 @@ def run_pipeline(script_list , out_folder = '', out_prefix = None): #, email_sen
   
   return pd.DataFrame(logs_out, columns = ['start','script','notebook_out','run_result','end'])
 
-def run_with_email(script_list, out_folder = '', out_prefix = None, email_dict = {} , sending = True
+def run_pipeline(script_list, out_folder = '', out_prefix = None, email_dict = {} , sending = True
                     , only_error = False, notebook_attached = False, attached_only_error = True, attached_log = False, log_sql = None) :
 
     if sending :
@@ -49,7 +49,7 @@ def run_with_email(script_list, out_folder = '', out_prefix = None, email_dict =
 
         run_output = 'Start Job at ' + str(datetime.now()) + '<br>' + '<br>'
 
-    run_log = run_pipeline(script_list , out_folder, out_prefix )
+    run_log = run_script(script_list , out_folder, out_prefix )
 
     if log_sql != None : 
         if ['job_name','table_name' , 'da_tran_SQL'].sort() != list(log_sql.keys()).sort() :
