@@ -9,7 +9,7 @@ def run_script(script_list , out_folder = '', out_prefix = None): #, email_sende
   logs_out = []
 
   # Create Directory if not exists
-  if not os.path.exists(out_folder) :
+  if (not os.path.exists(out_folder)) & (out_folder != '') :
     os.mkdir(out_folder)
 
   # Execute Python Part
