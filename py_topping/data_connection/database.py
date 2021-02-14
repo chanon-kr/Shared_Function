@@ -17,9 +17,13 @@ class da_tran_SQL :
         type_dic = {
                     'MSSQL' : ['mssql', 'pymssql', '1433','[',']','EXEC'],
                     'MYSQL' : ['mysql', 'pymysql','3306','','','CALL'],
-                    'POSTGRESQL' : ['postgresql', 'psycopg2','5432','"','"','SELECT * FROM ']
+                    'POSTGRESQL' : ['postgresql', 'psycopg2','5432','"','"','SELECT * FROM '],
+                    'SQLITE' : ['sqlite', 'sqlite', '','[',']','EXEC']
                     }
-                
+        
+        if (sql_type == 'SQLITE') & (chunksize == 150) :
+            self.chunksize = 50
+
         if type_dic.get(sql_type,'Error') == 'Error' :
             raise Exception("Please Insert Type of your Database with these range \n{}".format(list(type_dic.keys())))
         
@@ -30,9 +34,14 @@ class da_tran_SQL :
         else : additional_param = '?' + kwargs['parameter']
 
         self.begin_name, self.end_name, self.call_SP = type_dic[sql_type][3], type_dic[sql_type][4], type_dic[sql_type][5]
-        connection_str = str(type_dic[sql_type][0] + '+' + kwargs.get('driver',type_dic[sql_type][1])
-                           + '://' + user + ':' + password + '@' + host_name
-                           + ':' + kwargs.get('port',type_dic[sql_type][2]) + '/' + database_name + additional_param)
+
+        if (sql_type == 'SQLITE') & (kwargs.get('driver',None) == None) :
+            connection_str = str(type_dic[sql_type][0] + '://' + user + password + '/' + host_name + additional_param)
+        else :
+            connection_str = str(type_dic[sql_type][0] + '+' + kwargs.get('driver',type_dic[sql_type][1])
+                            + '://' + user + ':' + password + '@' + host_name
+                            + ':' + kwargs.get('port',type_dic[sql_type][2]) + '/' + database_name + additional_param)
+        
         self.engine = create_engine(connection_str)
         print(pd.read_sql_query("""SELECT 'Connection OK'""", con = self.engine).iloc[0,0]) 
 
