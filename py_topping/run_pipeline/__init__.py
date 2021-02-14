@@ -40,7 +40,7 @@ def run_script(script_list , out_folder = '', out_prefix = None): #, email_sende
   
   return pd.DataFrame(logs_out, columns = ['start','script','notebook_out','run_result','end'])
 
-def run_pipeline(script_list, out_folder = '', out_prefix = None, email_dict = {} , sending = True
+def run_pipeline(script_list, out_folder = '', out_prefix = None, email_dict = {} , sending = False
                     , only_error = False, notebook_attached = False, attached_only_error = True, attached_log = False, log_sql = None) :
 
     if sending :
