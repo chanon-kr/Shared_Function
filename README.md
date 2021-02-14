@@ -42,6 +42,7 @@ You could see samples of how to use this library inside the samples folder in gi
 ### general_use
   - To send email with python
   - To logging in csv file
+  - To check port status
 
 ***
 ## run_pipeline
