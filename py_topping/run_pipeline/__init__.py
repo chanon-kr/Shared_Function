@@ -40,11 +40,11 @@ def run_script(script_list , out_folder = '', out_prefix = None): #, email_sende
   
   return pd.DataFrame(logs_out, columns = ['start','script','notebook_out','run_result','end'])
 
-def run_pipeline(script_list, out_folder = '', out_prefix = None, email_dict = {} , sending = False
-                    , only_error = False, notebook_attached = False, attached_only_error = True, attached_log = False, log_sql = None) :
+def run_pipeline(script_list = [], out_folder = '', out_prefix = None, email_dict = None , sending = False
+                    , only_error = False, notebook_attached = False, attached_only_error = False, attached_log = False, log_sql = None) :
 
     if sending :
-        if (['user' , 'password', 'server' ,'sendto','subject'].sort() != list(email_dict.keys()).sort()) or (email_dict == {}) :
+        if (['user' , 'password', 'server' ,'sendto','subject'].sort() != list(email_dict.keys()).sort()) or (email_dict == None) :
             raise Exception("email_dict parameter must have 'user' , 'password' , 'server' , 'sendto' , 'subject' ")
 
         run_output = 'Start Job at ' + str(datetime.now()) + '<br>' + '<br>'
