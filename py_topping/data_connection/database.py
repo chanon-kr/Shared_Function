@@ -23,10 +23,16 @@ class da_tran_SQL :
         if type_dic.get(sql_type,'Error') == 'Error' :
             raise Exception("Please Insert Type of your Database with these range \n{}".format(list(type_dic.keys())))
         
+        if (kwargs.get('driver',None) == 'pyodbc') & (kwargs.get('parameter', None) == None) :
+            raise Exception("Please Insert ODBC's Driver in parameter agument\nfor example, for MSSQL : parameter = 'driver=SQL+Server'")
+        
+        if kwargs.get('parameter', None) == None : additional_param = ''
+        else : additional_param = '?' + kwargs['parameter']
+
         self.begin_name, self.end_name, self.call_SP = type_dic[sql_type][3], type_dic[sql_type][4], type_dic[sql_type][5]
         connection_str = str(type_dic[sql_type][0] + '+' + kwargs.get('driver',type_dic[sql_type][1])
                            + '://' + user + ':' + password + '@' + host_name
-                           + ':' + kwargs.get('port',type_dic[sql_type][2]) + '/' + database_name)
+                           + ':' + kwargs.get('port',type_dic[sql_type][2]) + '/' + database_name + additional_param)
         self.engine = create_engine(connection_str)
         print(pd.read_sql_query("""SELECT 'Connection OK'""", con = self.engine).iloc[0,0]) 
 
@@ -45,7 +51,10 @@ class da_tran_SQL :
                 i_next = i + self.partition_size
                 if self.parallel_dump :
                     sum_len += dask_dump(df_in.iloc[i:i_next,:],table_name_in,mode_in) 
-                    if (j == self.max_parallel) | (i_next >= df_length) : sum_len, j = sum_len.compute(), 1
+                    if (j == self.max_parallel) | (i_next >= df_length) : 
+                        sum_len, j = sum_len.compute(), 1
+                        if sum_len < i_next - 1  : 
+                            raise Exception("Parallel Dump Error Around row {} to row {}".format(int(i_next - self.partition_size*j),i_next))
                 else : sum_len += self.sub_dump(df_in.iloc[i:i_next,:],table_name_in,mode_in) 
                 j += 1
                 i += self.partition_size
