@@ -85,6 +85,6 @@ def run_pipeline(script_list, out_folder = '', out_prefix = None, email_dict = {
         em = email_sender(email_dict['user'] , email_dict['password'] , email_dict['server'])
         em.send(email_dict['sendto'] , email_subject , run_output , attachment= attached)
 
-    if attached_log : os.remove(file_name)
+    if sending & attached_log : os.remove(file_name)
 
     return out_log  
