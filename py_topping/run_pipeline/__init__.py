@@ -44,7 +44,7 @@ def run_pipeline(script_list, out_folder = '', out_prefix = None, email_dict = {
                     , only_error = False, notebook_attached = False, attached_only_error = True, attached_log = False, log_sql = None) :
 
     if sending :
-        if ['user' , 'password', 'server' ,'sendto','subject'].sort() != list(email_dict.keys()).sort() :
+        if (['user' , 'password', 'server' ,'sendto','subject'].sort() != list(email_dict.keys()).sort()) or (email_dict == {}) :
             raise Exception("email_dict parameter must have 'user' , 'password' , 'server' , 'sendto' , 'subject' ")
 
         run_output = 'Start Job at ' + str(datetime.now()) + '<br>' + '<br>'
@@ -57,9 +57,10 @@ def run_pipeline(script_list, out_folder = '', out_prefix = None, email_dict = {
         run_log['job_name'] = log_sql['job_name']
         run_log.astype('str').to_sql(log_sql['table_name'], con = log_sql['da_tran_SQL'].engine , if_exists = 'append', index = False)
         run_log = run_log.drop(['job_name'], axis = 1)
-        
 
-    if only_error  : 
+
+
+    elif only_error  : 
         if (run_log['run_result'] != 'OK').sum() == 0 : sending = False
         else : run_log = run_log[(run_log['run_result'] != 'OK')]
 
