@@ -50,6 +50,7 @@ def run_pipeline(script_list, out_folder = '', out_prefix = None, email_dict = {
         run_output = 'Start Job at ' + str(datetime.now()) + '<br>' + '<br>'
 
     run_log = run_script(script_list , out_folder, out_prefix )
+    out_log = run_log.copy()
 
     if log_sql != None : 
         if ['job_name','table_name' , 'da_tran_SQL'].sort() != list(log_sql.keys()).sort() :
@@ -87,5 +88,5 @@ def run_pipeline(script_list, out_folder = '', out_prefix = None, email_dict = {
         em.send(email_dict['sendto'] , email_subject , run_output , attachment= attached)
 
     if attached_log : os.remove(file_name)
-
     
+    return out_log  
