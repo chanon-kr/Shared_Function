@@ -59,13 +59,11 @@ def run_pipeline(script_list, out_folder = '', out_prefix = None, email_dict = {
         run_log.astype('str').to_sql(log_sql['table_name'], con = log_sql['da_tran_SQL'].engine , if_exists = 'append', index = False)
         run_log = run_log.drop(['job_name'], axis = 1)
 
-
-
-    elif only_error  : 
+    if sending & only_error  : 
         if (run_log['run_result'] != 'OK').sum() == 0 : sending = False
         else : run_log = run_log[(run_log['run_result'] != 'OK')]
 
-    if notebook_attached : 
+    if sending & notebook_attached : 
         if attached_only_error : 
             attached = run_log[(run_log['run_result'] != 'OK') & (run_log['notebook_out'].str.len() > 0)]['notebook_out'].unique()
         else : 
@@ -74,7 +72,7 @@ def run_pipeline(script_list, out_folder = '', out_prefix = None, email_dict = {
         else : attached = list(attached)
     else : attached = None
     
-    if attached_log :
+    if sending & attached_log :
         file_name = 'LOG_{}.csv'.format(datetime.now().strftime('%Y_%m_%d_%H_%M'))
         run_log.to_csv(file_name,index = False)
         if attached == None : attached = [file_name]
@@ -88,5 +86,5 @@ def run_pipeline(script_list, out_folder = '', out_prefix = None, email_dict = {
         em.send(email_dict['sendto'] , email_subject , run_output , attachment= attached)
 
     if attached_log : os.remove(file_name)
-    
+
     return out_log  
