@@ -36,7 +36,7 @@ class da_tran_SQL :
         self.begin_name, self.end_name, self.call_SP = type_dic[sql_type][3], type_dic[sql_type][4], type_dic[sql_type][5]
 
         if (sql_type == 'SQLITE') & (kwargs.get('driver',None) == None) :
-            connection_str = str(type_dic[sql_type][0] + '://' + user + password + '/' + host_name + additional_param)
+            connection_str = str(type_dic[sql_type][0] + ':///' + host_name + additional_param)
         else :
             connection_str = str(type_dic[sql_type][0] + '+' + kwargs.get('driver',type_dic[sql_type][1])
                             + '://' + user + ':' + password + '@' + host_name
