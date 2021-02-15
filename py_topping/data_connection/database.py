@@ -115,20 +115,19 @@ class da_tran_SQL :
 
     def dump_whole(self, df_in, table_name_in , fix_table = False, debug = False) :
         """Delete exists table and replace with new df"""
-        if fix_table : 
-            print('Delete Existing data from Table at ',pd.Timestamp.now())
-            self.engine.execute("""DELETE FROM {}{}{}""".format(self.begin_name,table_name_in,self.end_name))
-            #Dump df_in to database
-            #df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'append',chunksize = self.chunksize, method = 'multi')
-            self.dump_main( df_in, table_name_in ,mode_in = 'append') 
-            print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
-        else :
-            print('Drop Existing Table at ',pd.Timestamp.now())
-            self.engine.execute("""DROP TABLE {}{}{}""".format(self.begin_name,table_name_in,self.end_name))
-            #Dump df_in to database
-            #df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'replace',chunksize = self.chunksize, method = 'multi')
-            self.dump_main( df_in, table_name_in ,mode_in = 'append') 
-            print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
+        try :
+            if fix_table : 
+                print('Delete Existing data from Table at ',pd.Timestamp.now())
+                self.engine.execute("""DELETE FROM {}{}{}""".format(self.begin_name,table_name_in,self.end_name))
+            else :
+                print('Drop Existing Table at ',pd.Timestamp.now())
+                self.engine.execute("""DROP TABLE {}{}{}""".format(self.begin_name,table_name_in,self.end_name))
+        except Exception as e:
+            print('Delete error or Do not have table to delete at',pd.Timestamp.now())
+            if debug : print(e)
+        #Dump df_in to database
+        self.dump_main( df_in, table_name_in ,mode_in = 'append') 
+        print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
 
     def write_in_sql(self,df_in , key) :
         """Write SQL Condition Query 'in (x,x,x)'"""
