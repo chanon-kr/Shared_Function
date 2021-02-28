@@ -15,6 +15,7 @@ You could see samples of how to use this library inside the samples folder in gi
 (https://github.com/chanon-kr/Shared_Function)
 <br><br>
 
+
 ***
 ## data_connection
 ***
@@ -23,7 +24,9 @@ You could see samples of how to use this library inside the samples folder in gi
   - to read csv/excel from SP365 as pandas dataframe
   - to download List as csv or pandas dataframe from SP365
   - upload file to SP365 or SP on prim
-
+  - Dependencies for this library as listed ;
+```Office365-REST-Python-Client (recommend 2.2.1)```
+<br><br>
 ***
 ### database
   - Work with SQL Server, MySQL and PostGreSQL
@@ -35,7 +38,12 @@ You could see samples of how to use this library inside the samples folder in gi
   - Can parallel insert by using dask's delayed
   - Can't read Store Procedure in PostGreSQL, will solve this in later version
   - Will working with Oracle Database in later version
-
+  - Dependencies for this library as listed ;
+```sqlalchemy```
+```pandas```
+```dask```
+```toolz```
+<br><br>
 ***
 ## general_use
 ***
@@ -52,3 +60,5 @@ You could see samples of how to use this library inside the samples folder in gi
     - with logging as a csv
     - with logging into sql table
     - with emailing the log when have/don't have errors
+    - Dependencies for this library as listed ;
+```papermill```
