@@ -20,7 +20,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/chanon-kr/Shared_Function",
-    download_url = "https://github.com/chanon-kr/Shared_Function/archive/0.2.3.tar.gz",
+    download_url = "https://github.com/chanon-kr/Shared_Function/archive/0.2.4.tar.gz",
     keywords = ["utility"],
     packages=setuptools.find_packages(),
     classifiers=[
