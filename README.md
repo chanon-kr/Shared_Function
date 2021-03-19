@@ -45,6 +45,14 @@ You could see samples of how to use this library inside the samples folder in gi
 ```toolz```
 <br><br>
 ***
+## data_paration
+***
+  - encode categorical column
+  - Dependencies for this library as listed ;
+```pandas```
+```sklearn```
+<br><br>
+***
 ## general_use
 ***
 ### general_use
