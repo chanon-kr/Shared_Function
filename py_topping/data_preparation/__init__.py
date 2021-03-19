@@ -12,22 +12,32 @@ def create_encoder(df_in , col_in, folder_in , debug = False) :
         del en_encoder
 
 def encode_col(df_in , col_in , folder_in , debug = False) :
+    df_out = df_in.copy()
     for i_in in col_in :
         en_encoder = load('{}/en__{}__.pkl'.format(folder_in, i_in))
         all_class = list(en_encoder.classes_)
-        df_in[i_in] = df_in[i_in].astype('str').astype('category').apply(lambda j_in : 
+        df_out[i_in] = df_out[i_in].astype('str').astype('category').apply(lambda j_in : 
                                                              en_encoder.transform([j_in])[0] if j_in in all_class 
                                                              else len(all_class) )
         if debug : print(i_in , ':' , len(all_class) ,'Classes')
-    return df_in
+    return df_out
 
 def decode_col(df_in , col_in , folder_in , debug = False) :
+    df_out = df_in.copy()
     for i_in in col_in :
         en_encoder = load('{}/en__{}__.pkl'.format(folder_in, i_in))
         all_class = list(en_encoder.classes_)
-        df_in[i_in] = df_in[i_in].astype('int').apply(lambda j_in : 
+        df_out[i_in] = df_out[i_in].astype('int').apply(lambda j_in : 
                                                              en_encoder.inverse_transform([j_in])[0] if j_in < len(all_class) 
                                                              else 'unknown' )
         if debug : print(i_in , ':' , len(all_class) ,'Classes')
-    return df_in
+    return df_out
 
+def create_lag(df_in , col_in , lag_range , lag_name = 'lag' , debug = False) :
+    df_out = df_in.copy()
+    for i_in in range(0,lag_range) :
+        if debug : print(i_in + 1)
+        df_buf = df_out[col_in].shift(i_in + 1)
+        df_buf.columns = ['{}_{}_{}'.format(j_in, lag_name , i_in + 1) for j_in in df_buf.columns]
+        df_out = pd.concat([df_out,df_buf] , axis = 1)
+    return df_out
