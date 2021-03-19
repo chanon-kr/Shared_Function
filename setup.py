@@ -12,7 +12,7 @@ requirements = [
 
 setuptools.setup(
     name="py_topping",
-    version="0.2.4",
+    version="0.2.6",
     license = "MIT",	
     author="Chanon Krittapholchai",
     author_email="chanon.krittapholchai@gmail.com",
