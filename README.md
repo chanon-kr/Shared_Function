@@ -45,9 +45,10 @@ You could see samples of how to use this library inside the samples folder in gi
 ```toolz```
 <br><br>
 ***
-## data_paration
+## data_preparation
 ***
   - encode categorical column
+  - create lagging parameter
   - Dependencies for this library as listed ;
 ```pandas```
 ```sklearn```
