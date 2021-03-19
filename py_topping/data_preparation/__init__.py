@@ -33,11 +33,15 @@ def decode_col(df_in , col_in , folder_in , debug = False) :
         if debug : print(i_in , ':' , len(all_class) ,'Classes')
     return df_out
 
-def create_lag(df_in , col_in , lag_range , lag_name = 'lag' , debug = False) :
+def create_lag(df_in , col_in , lag_range , lag_name = 'lag' , drop_null = True, debug = False) :
     df_out = df_in.copy()
+    lag_col = []
     for i_in in range(0,lag_range) :
         if debug : print(i_in + 1)
         df_buf = df_out[col_in].shift(i_in + 1)
-        df_buf.columns = ['{}_{}_{}'.format(j_in, lag_name , i_in + 1) for j_in in df_buf.columns]
+        col_buf = ['{}_{}_{}'.format(j_in, lag_name , i_in + 1) for j_in in df_buf.columns]
+        df_buf.columns = col_buf
         df_out = pd.concat([df_out,df_buf] , axis = 1)
+        lag_col += col_buf
+    if drop_null : df_out = df_out[df_out[lag_col].notnull().min(axis = 1) != 0]
     return df_out
