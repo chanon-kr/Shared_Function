@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 import os
+from joblib import dump, load
 
 def create_encoder(df_in , col_in, folder_in , debug = False) :
     if not os.path.exists(folder_in) : 
