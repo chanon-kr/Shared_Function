@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
-def create_encoding(df_in , col_in, folder_in , debug = False) :
+def create_encoder(df_in , col_in, folder_in , debug = False) :
     if not os.path.exists(folder_in) : 
         if debug : print('Folder {} created'.format(folder_in))
         os.mkdir(folder_in)
