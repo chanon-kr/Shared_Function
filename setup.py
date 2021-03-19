@@ -4,8 +4,8 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 requirements = [
-                "pymssql == 2.1.4",
-                "Office365-REST-Python-Client"
+#                "pymssql == 2.1.4",
+#                "Office365-REST-Python-Client"
 #                ,"SQLAlchemy"
 #                ,"pandas >= 1" , "requests"
               ]
