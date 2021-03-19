@@ -1,8 +1,10 @@
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
-def create_encoding(df_in , col_in, folder_in) :
-    if not os.path.exists(folder_in) : os.mkdir(folder_in)
+def create_encoding(df_in , col_in, folder_in , debug = False) :
+    if not os.path.exists(folder_in) : 
+        if debug : print('Folder {} created'.format(folder_in))
+        os.mkdir(folder_in)
     for i_in in col_in :
         en_encoder = LabelEncoder()
         en_encoder.fit(df_in[i_in].astype('str').astype('category'))
