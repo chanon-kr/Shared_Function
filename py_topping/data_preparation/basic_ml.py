@@ -2,12 +2,13 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 
 def basic_dnn(train_in , num_col_in , cat_col_in , target_in , node_in 
-              , val_in = None , train_batch = 10 , val_batch = 10 , epochs = 10 
+              , val_in = None , train_batch = 10 , val_batch = 10 , epochs = 10 , normalize = True
               , embedded_size = 16 , drop_out_ratio = 0.1, patience_in = 10
               , amplify_in = 1,  optimize_in = 'adam', loss_in = 'mse' , debug = False) :
     
     input_num_list = []
     input_cat_list = []
+    normalize_list = []
     embedded_list = []
 
     labels = train_in.copy().pop(target_in)
@@ -25,6 +26,11 @@ def basic_dnn(train_in , num_col_in , cat_col_in , target_in , node_in
     for i_in in num_col_in :
         j_in = tf.keras.Input(shape=(1,), name=i_in)
         input_num_list.append(j_in)
+        normalize_list.append(tf.keras.layers.BatchNormalization(
+                                                    name= str(i_in) + '_normalize',
+                                                )(j_in))
+
+    if not normalize : normalize_list = input_num_list
 
     for i_in in cat_col_in :
         j_in = tf.keras.Input(shape=(1,), name=i_in)
@@ -36,9 +42,9 @@ def basic_dnn(train_in , num_col_in , cat_col_in , target_in , node_in
         all_cat_fea = tf.keras.layers.concatenate(embedded_list)
         all_cat_fea = tf.keras.layers.Dropout(drop_out_ratio)(all_cat_fea)
         flat_layer = tf.keras.layers.Flatten()(all_cat_fea)
-        if len(input_num_list) > 0 :
-            flat_layer = tf.keras.layers.concatenate(input_num_list +  [flat_layer])
-    else : flat_layer = tf.keras.layers.concatenate(input_num_list)
+        if len(normalize_list) > 0 :
+            flat_layer = tf.keras.layers.concatenate(normalize_list +  [flat_layer])
+    else : flat_layer = tf.keras.layers.concatenate(normalize_list)
     
     count_in = 0
     for i_in in node_in :
