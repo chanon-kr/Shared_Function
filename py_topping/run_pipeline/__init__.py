@@ -7,7 +7,7 @@ from py_topping.general_use import email_sender
 
 def run_script(script_list , out_folder = '', out_prefix = None): #, email_sender, email_sendto,email_subject ,run_output , ) :
   logs_out = []
-  re_pattern = '[.!@#$ %^*\+\=\?<>()\[\]\-]'
+  re_pattern = '[!@#$ %^*\+\=\?<>()\[\]\-]'
 
   # Create Directory if not exists
   if (not os.path.exists(out_folder)) & (out_folder != '') :
