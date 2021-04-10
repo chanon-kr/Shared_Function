@@ -1,7 +1,7 @@
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
-def lazy_dnn(train_in , num_col_in , cat_col_in , target_in , node_in 
+def lazy_dnn(train_in , num_col_in = [], cat_col_in = [], target_in , node_in 
               , val_in = None , train_batch = 10 , val_batch = 10 , epochs = 10 , normalize = True
               , embedded_size = 16 , drop_out_ratio = 0.1, patience_in = 10
               , amplify_in = 1,  optimize_in = 'adam', loss_in = 'mse' , debug = False) :
