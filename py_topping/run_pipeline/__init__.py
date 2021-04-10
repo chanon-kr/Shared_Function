@@ -1,12 +1,13 @@
 
 from datetime import datetime
-import os, traceback
+import os, re, traceback
 import papermill as pm
 import pandas as pd
 from py_topping.general_use import email_sender
 
 def run_script(script_list , out_folder = '', out_prefix = None): #, email_sender, email_sendto,email_subject ,run_output , ) :
   logs_out = []
+  re_pattern = '[.!@#$ %^*\+\=\?<>()\[\]\-]'
 
   # Create Directory if not exists
   if (not os.path.exists(out_folder)) & (out_folder != '') :
@@ -26,8 +27,8 @@ def run_script(script_list , out_folder = '', out_prefix = None): #, email_sende
             pm.execute_notebook(i,out_name)
         elif i.split('.')[-1] == 'py' :
             log_out.append(None)
-            if ' ' in i :
-                print("Script File {} has ' ' in the name, Will EXECUTE with UNSAFE method".format(i))
+            if len(re.findall(re_pattern, i )) > 0 :
+                print("Script File {} has {} in the name, Will EXECUTE with UNSAFE method".format(i,re_pattern))
                 with open(i, encoding="utf8",newline='') as f :
                     exec(f.read())
             else : 
