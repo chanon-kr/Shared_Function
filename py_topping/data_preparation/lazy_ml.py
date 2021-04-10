@@ -39,7 +39,8 @@ def lazy_dnn(train_in , num_col_in , cat_col_in , target_in , node_in
                                 input_length=1, name= str(i_in) + '_embedding')(j_in))
         
     if len(embedded_list) > 0 : 
-        all_cat_fea = tf.keras.layers.concatenate(embedded_list)
+        if len(embedded_list) == 1 : all_cat_fea = embedded_list[0]
+        else : all_cat_fea = tf.keras.layers.concatenate(embedded_list)
         all_cat_fea = tf.keras.layers.Dropout(drop_out_ratio)(all_cat_fea)
         flat_layer = tf.keras.layers.Flatten()(all_cat_fea)
         if len(normalize_list) > 0 :
