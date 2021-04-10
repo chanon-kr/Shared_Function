@@ -44,7 +44,9 @@ def lazy_dnn(train_in , num_col_in , cat_col_in , target_in , node_in
         flat_layer = tf.keras.layers.Flatten()(all_cat_fea)
         if len(normalize_list) > 0 :
             flat_layer = tf.keras.layers.concatenate(normalize_list +  [flat_layer])
-    else : flat_layer = tf.keras.layers.concatenate(normalize_list)
+    else : 
+        if len(normalize_list) == 1 : flat_layer = normalize_list[0]
+        else : flat_layer = tf.keras.layers.concatenate(normalize_list)
     
     count_in = 0
     for i_in in node_in :
