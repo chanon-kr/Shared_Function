@@ -26,8 +26,15 @@ def run_script(script_list , out_folder = '', out_prefix = None): #, email_sende
             pm.execute_notebook(i,out_name)
         elif i.split('.')[-1] == 'py' :
             log_out.append(None)
-            with open(i, encoding="utf8",newline='') as f :
-                exec(f.read())
+            if ' ' in i :
+                print("Script File {} has ' ' in the name, Will EXECUTE with UNSAFE method".format(i))
+                with open(i, encoding="utf8",newline='') as f :
+                    exec(f.read())
+            else : 
+                i_ = i.replace('.py','')
+                if i_[0] == '/' : i_ = i_[1:]
+                for j in ['/','\\'] : i_ = i_.replace(j , '.')
+                exec('import {}'.format(i_))
         else : 
             log_out.append(None)
             raise Exception("File Type Not Match, Please use .py or .ipynb file")
