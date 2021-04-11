@@ -12,19 +12,19 @@ requirements = [
 
 setuptools.setup(
     name="py_topping",
-    version="0.2.8",
+    version="0.3.1",
     license = "MIT",	
     author="Chanon Krittapholchai",
     author_email="chanon.krittapholchai@gmail.com",
-    description="simplify functions from other libraries function in 1-2 lines",
+    description="simplify functions from other libraries functions in 1-2 lines",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/chanon-kr/Shared_Function",
-    download_url = "https://github.com/chanon-kr/Shared_Function/archive/0.2.7.tar.gz",
-    keywords = ["utility"],
+    download_url = "https://github.com/chanon-kr/Shared_Function/archive/0.3.1.tar.gz",
+    keywords = ["utility","ETL"],
     packages=setuptools.find_packages(),
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License"
     ],
