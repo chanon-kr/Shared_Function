@@ -47,11 +47,13 @@ You could see samples of how to use this library inside the samples folder in gi
 ***
 ## data_preparation
 ***
-  - encode categorical column
-  - create lagging parameter
+  - Encode categorical column
+  - Create lagging parameter
+  - Simple Deep Learning Model for Regression
   - Dependencies for this library as listed ;
 ```pandas```
 ```sklearn```
+```tensorflow>=2```
 <br><br>
 ***
 ## general_use
