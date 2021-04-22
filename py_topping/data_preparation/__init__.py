@@ -38,10 +38,12 @@ def decode_col(df_in , col_in , folder_in , debug = False) :
 def create_lag(df_in , col_in , lag_range , lag_name = 'lag' , drop_null = True, debug = False) :
     df_out = df_in.copy()
     lag_col = []
-    for i_in in range(0,lag_range) :
+    if lag_range >= 0 : loop_range = range(0,lag_range)
+    elif lag_range < 0 : loop_range = range(lag_range - 1, -1)
+    for i_in in loop_range :
         if debug : print(i_in + 1)
         df_buf = df_out[col_in].shift(i_in + 1)
-        col_buf = ['{}_{}_{}'.format(j_in, lag_name , i_in + 1) for j_in in df_buf.columns]
+        col_buf = ['{}_{}_{}'.format(j_in, lag_name , str(i_in + 1).replace('-','m')) for j_in in df_buf.columns]
         df_buf.columns = col_buf
         df_out = pd.concat([df_out,df_buf] , axis = 1)
         lag_col += col_buf
