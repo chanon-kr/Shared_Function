@@ -6,7 +6,7 @@ class da_tran_bucket:
     def __init__(self, project_id, bucket_name,credential = '') :
         self.project_id = project_id
         self.bucket_name = bucket_name
-        self.credentials = credentials
+        self.credentials = credential
 
     def download(self, bucket_file, local_file):
         if self.credentials == '' : pass
