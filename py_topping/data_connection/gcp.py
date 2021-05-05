@@ -20,7 +20,19 @@ class da_tran_bucket:
         blob = bucket.blob(bucket_file)
         # Download the file to a destination
         blob.download_to_filename(local_file)
-    
+
+    def download_folder(self, bucket_folder, local_folder):
+        if self.credentials == '' : pass
+        else : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials
+
+        # Initialise a client
+        client = storage.Client(self.project_id)
+        bucket = client.get_bucket(self.bucket_name)
+        blobs = bucket.list_blobs(prefix=bucket_folder)  # Get list of files
+        for blob in blobs:
+            filename = blob.name.split('/')[-1]
+            blob.download_to_filename(local_folder + '/'+ filename)  # Download
+
     def upload(self, bucket_file, local_file):
         if self.credentials == '' : pass
         else : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials
