@@ -2,7 +2,7 @@ import os
 from google.cloud import storage
 
 
-class da_tran_gcp:
+class da_tran_bucket:
     def __init__(self, project_id, bucket_name,credentials = '') :
         self.project_id = project_id
         self.bucket_name = bucket_name
