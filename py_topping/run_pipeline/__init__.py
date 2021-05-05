@@ -1,6 +1,6 @@
 
 from datetime import datetime
-import os, re, traceback
+import os, re, traceback, sys
 import papermill as pm
 import pandas as pd
 from py_topping.general_use import email_sender
@@ -36,6 +36,7 @@ def run_script(script_list , out_folder = '', out_prefix = None): #, email_sende
                 if i_[0] == '/' : i_ = i_[1:]
                 for j in ['/','\\'] : i_ = i_.replace(j , '.')
                 exec('import {}'.format(i_))
+                sys.modules.pop('{}'.format(i_))
         else : 
             log_out.append(None)
             raise Exception("File Type Not Match, Please use .py or .ipynb file")
