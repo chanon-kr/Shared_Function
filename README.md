@@ -28,6 +28,13 @@ You could see samples of how to use this library inside the samples folder in gi
 ```Office365-REST-Python-Client (recommend 2.2.1)```
 <br><br>
 ***
+### gcp
+  - to download file from GCP's bucket Storage
+  - upload file from GCP's bucket Storage
+  - Dependencies for this library as listed ;
+```...```
+<br><br>
+***
 ### database
   - Work with SQL Server, MySQL and PostGreSQL
   - To read view, table or store procedure as pandas dataframe 
