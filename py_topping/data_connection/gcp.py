@@ -3,7 +3,7 @@ from google.cloud import storage
 
 
 class da_tran_bucket:
-    def __init__(self, project_id, bucket_name,credentials = '') :
+    def __init__(self, project_id, bucket_name,credential = '') :
         self.project_id = project_id
         self.bucket_name = bucket_name
         self.credentials = credentials
