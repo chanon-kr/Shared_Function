@@ -156,7 +156,7 @@ class da_tran_SQL :
     def dump_replace(self, df_in, table_name_in, list_key, math_logic = '',debug = False):
         """Delete exists row of table in database with same key(s) as df and dump df append to table"""
         #Create SQL Query for Delete
-        sql_q = 'delete from ' + table_name_in + ' where '
+        sql_q = """DELETE FROM {}{}{} where """.format(self.begin_name,table_name_in,self.end_name)
 
         if math_logic != '' : logic_list = list(math_logic.keys())
         else : logic_list = ['There_is_no_logic_math_need_to_write'] # column in logic_list will never be true
