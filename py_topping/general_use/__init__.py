@@ -81,7 +81,6 @@ def log_csv(file_name,msg_in):
     if os.path.exists(file_name) : logic = False
     if '/' in file_name : 
         if file_name.split('/')[0] != '' :
-            print(file_name.split('/')[0])
             dir_name = re.sub('(/.*\..*)','',file_name)
             if not os.path.isdir(dir_name) : os.mkdir(dir_name)
     with open(file_name, 'a', newline='') as csvfile:
