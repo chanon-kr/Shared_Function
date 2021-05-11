@@ -84,7 +84,7 @@ def log_csv(file_name,msg_in):
             print(file_name.split('/')[0])
             dir_name = re.sub('(/.*\..*)','',file_name)
             if not os.path.isdir(dir_name) : os.mkdir(dir_name)
-    with open(file_name.replace('/',''), 'a', newline='') as csvfile:
+    with open(file_name, 'a', newline='') as csvfile:
         fieldnames = ['Timestamp','msg']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         if logic : writer.writeheader()
