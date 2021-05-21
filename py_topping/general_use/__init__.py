@@ -7,7 +7,7 @@ from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 import mimetypes
 from datetime import datetime
-import os , csv , re, socket
+import os , csv , re, socket, requests
 
 class email_sender :
     def __init__(self, user, password, servername):
@@ -75,6 +75,29 @@ class email_sender :
         #Sending Email and return status text
         return self.executor(recipients, message)
 
+class lazy_LINE :
+    def __init__(self, token) :
+        self.token = token
+    
+    def help(self) :
+        helper = 'Main Page : https://notify-bot.line.me/en\n'
+        helper += 'Doc : https://notify-bot.line.me/doc/en\n'
+        helper += 'Sticker List : https://developers.line.biz/en/docs/messaging-api/sticker-list'
+        print(helper)
+    
+    def send(self, message , stickerPackageId = '', stickerId = '') :
+        payload = {}
+        payload['message'] = message
+
+        if (stickerPackageId != '') & (stickerId != '') :
+            payload['stickerPackageId'] = stickerPackageId
+            payload['stickerId'] = stickerId
+        
+        r = requests.post('https://notify-api.line.me/api/notify'
+                            , headers={'content-type':'application/x-www-form-urlencoded' , 
+                                       'Authorization' : 'Bearer {}'.format(self.token)}
+                            , params = payload)
+        return r
 
 def log_csv(file_name,msg_in):
     logic = True
