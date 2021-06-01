@@ -85,18 +85,23 @@ class lazy_LINE :
         helper += 'Sticker List : https://developers.line.biz/en/docs/messaging-api/sticker-list'
         print(helper)
     
-    def send(self, message , stickerPackageId = '', stickerId = '') :
+    def send(self, message , stickerPackageId = '', stickerId = '', notification = True, picture = '') :
         payload = {}
         payload['message'] = message
+        payload['notificationDisabled'] = not notification
 
         if (stickerPackageId != '') & (stickerId != '') :
             payload['stickerPackageId'] = stickerPackageId
             payload['stickerId'] = stickerId
         
-        r = requests.post('https://notify-api.line.me/api/notify'
-                            , headers={'content-type':'application/x-www-form-urlencoded' , 
-                                       'Authorization' : 'Bearer {}'.format(self.token)}
-                            , params = payload)
+        if picture == '' : 
+            r = requests.post('https://notify-api.line.me/api/notify'
+                                , headers={'Authorization' : 'Bearer {}'.format(self.token)}
+                                , params = payload)
+        else :
+            r = requests.post('https://notify-api.line.me/api/notify'
+                                , headers={'Authorization' : 'Bearer {}'.format(self.token)}
+                                , params = payload , files = {'imageFile': open(picture, 'rb')})
         return r
 
 def log_csv(file_name,msg_in):
