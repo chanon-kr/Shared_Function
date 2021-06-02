@@ -10,6 +10,8 @@ class da_tran_SQL :
         sql_type = sql_type.upper()
         self.sql_type = sql_type
         self.chunksize = int(chunksize)
+        if sql_type == 'BIGQUERY' : self.method = None
+        else : self.method = 'multi'
         self.partition_size = int(partition_size)
         self.parallel_dump = parallel_dump
         self.max_parallel = int(max_parallel)
@@ -38,7 +40,7 @@ class da_tran_SQL :
         if (sql_type == 'SQLITE') & (kwargs.get('driver',None) == None) :
             connection_str = """{}:///{}{}""".format(type_dic[sql_type][0] , host_name , additional_param)
         elif sql_type == 'BIGQUERY' :
-            connection_string = "{}://{}/{}".format(type_dic[sql_type][0],host_name,database_name)
+            connection_str = "{}://{}/{}".format(type_dic[sql_type][0],host_name,database_name)
         else :
             connection_str = """{}+{}://{}:{}@{}:{}/{}{}""".format(type_dic[sql_type][0],kwargs.get('driver',type_dic[sql_type][1])
                                                             ,user,password,host_name,kwargs.get('port',type_dic[sql_type][2])
@@ -52,7 +54,7 @@ class da_tran_SQL :
 
     def sub_dump(self, df_in,table_name_in,mode_in) :
         """normal to_sql for dask's delayed in dump_main"""
-        df_in.to_sql(table_name_in, con = self.engine, index = False,if_exists = mode_in,chunksize = self.chunksize, method = 'multi')
+        df_in.to_sql(table_name_in, con = self.engine, index = False,if_exists = mode_in,chunksize = self.chunksize, method = self.method)
         return len(df_in)
 
     def dump_main(self, df_in, table_name_in ,mode_in) :
