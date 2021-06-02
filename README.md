@@ -36,20 +36,26 @@ You could see samples of how to use this library inside the samples folder in gi
 <br><br>
 ***
 ### database
-  - Work with SQL Server, MySQL and PostGreSQL
+  - Original to Work with SQL Server, MySQL, PostGreSQL and SQLite
+  - Can work with GCP's BigQuery, still need more test on Cloud
   - To read view, table or store procedure as pandas dataframe 
   - To insert pandas dataframe into SQL with option for existing row :
     - Replace same key(s) with new from dataframe with option to use ">" or "<" condition
     - Add Only row with non-existing key(s)
     - Replace whole table
-  - Can parallel insert by using dask's delayed
-  - Can't read Store Procedure in PostGreSQL, will solve this in later version
+  - Can parallel insert by using dask's delayed (not recommend)
+  - Can't read Store Procedure in PostGreSQL and BigQuery will solve this in later version
   - Will working with Oracle Database in later version
   - Dependencies for this library as listed ;
 ```sqlalchemy```
 ```pandas```
 ```dask```
 ```toolz```
+  - Additional dependencies for GCP's BigQuery as listed ;
+```pybigquery```
+```pandas-gbq```
+```google-cloud-bigquery```
+```google-cloud-bigquery-storage```
 <br><br>
 ***
 ## data_preparation
@@ -69,6 +75,7 @@ You could see samples of how to use this library inside the samples folder in gi
   - To send email with python
   - To logging in csv file
   - To check port status
+  - To send LINE message, sticker or picture with line notify
 
 ***
 ## run_pipeline
