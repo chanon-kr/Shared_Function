@@ -4,7 +4,7 @@ from dask import delayed
 
 class da_tran_SQL :
     """interact with SQL"""
-    def __init__(self, sql_type, host_name, database_name, user, password 
+    def __init__(self, sql_type, host_name, database_name, user = '', password = '' 
                 , chunksize = 150, partition_size = 5000, parallel_dump = False, max_parallel = 2, **kwargs):
         """Create connection to SQL Server"""
         sql_type = sql_type.upper()
@@ -13,7 +13,6 @@ class da_tran_SQL :
         self.partition_size = int(partition_size)
         self.parallel_dump = parallel_dump
         self.max_parallel = int(max_parallel)
-
         type_dic = {
                     'MSSQL' : ['mssql', 'pymssql', '1433','[',']','EXEC'],
                     'MYSQL' : ['mysql', 'pymysql','3306','`','`','CALL'],
