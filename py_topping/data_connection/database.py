@@ -16,7 +16,7 @@ class da_tran_SQL :
 
         type_dic = {
                     'MSSQL' : ['mssql', 'pymssql', '1433','[',']','EXEC'],
-                    'MYSQL' : ['mysql', 'pymysql','3306','','','CALL'],
+                    'MYSQL' : ['mysql', 'pymysql','3306','`','`','CALL'],
                     'POSTGRESQL' : ['postgresql', 'psycopg2','5432','"','"','SELECT * FROM '],
                     'SQLITE' : ['sqlite', 'sqlite', '','[',']','EXEC'],
                     'BIGQUERY' : ['bigquery', 'bigquery','','`','`','CALL'],
@@ -37,11 +37,11 @@ class da_tran_SQL :
         self.begin_name, self.end_name, self.call_SP = type_dic[sql_type][3], type_dic[sql_type][4], type_dic[sql_type][5]
 
         if (sql_type == 'SQLITE') & (kwargs.get('driver',None) == None) :
-            connection_str = str(type_dic[sql_type][0] + ':///' + host_name + additional_param)
+            connection_str = """{}:///{}{}""".format(type_dic[sql_type][0] , host_name , additional_param)
         else :
-            connection_str = str(type_dic[sql_type][0] + '+' + kwargs.get('driver',type_dic[sql_type][1])
-                            + '://' + user + ':' + password + '@' + host_name
-                            + ':' + kwargs.get('port',type_dic[sql_type][2]) + '/' + database_name + additional_param)
+            connection_str = """{}+{}://{}:{}@{}:{}/{}{}""".format(type_dic[sql_type][0],kwargs.get('driver',type_dic[sql_type][1])
+                                                            ,user,password,host_name,kwargs.get('port',type_dic[sql_type][2])
+                                                            ,database_name , additional_param)
         
         self.engine = create_engine(connection_str)
         print(pd.read_sql_query("""SELECT 'Connection OK'""", con = self.engine).iloc[0,0]) 
