@@ -18,7 +18,8 @@ class da_tran_SQL :
                     'MSSQL' : ['mssql', 'pymssql', '1433','[',']','EXEC'],
                     'MYSQL' : ['mysql', 'pymysql','3306','','','CALL'],
                     'POSTGRESQL' : ['postgresql', 'psycopg2','5432','"','"','SELECT * FROM '],
-                    'SQLITE' : ['sqlite', 'sqlite', '','[',']','EXEC']
+                    'SQLITE' : ['sqlite', 'sqlite', '','[',']','EXEC'],
+                    'BIGQUERY' : ['bigquery', 'bigquery','','`','`','CALL'],
                     }
         
         if (sql_type == 'SQLITE') & (chunksize == 150) :
