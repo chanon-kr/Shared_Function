@@ -19,7 +19,7 @@ class da_tran_SQL :
     : user = string - User for MSSQL, MYSQL, POSTGRESQL
 
     : password = string - password for MSSQL, MYSQL, POSTGRESQL
-    
+
     : credentials_path = string - path to GCP credentials file (json)
 
     more sample of this class at https://github.com/chanon-kr/Shared_Function/blob/main/samples/database.ipynb
@@ -68,14 +68,28 @@ class da_tran_SQL :
                                                             ,database_name , additional_param)
         
         if (credentials_path != '') & (sql_type == 'BIGQUERY') :
-            self.engine = create_engine(connection_str, credentials_path = credentials_path)
-        else :
+            # self.engine = create_engine(connection_str, credentials_path = credentials_path)
+            from google.oauth2 import service_account
+            self.project_id = host_name
+            # self.dataset = self.begin_name + database_name + self.end_name + '.'
+            self.dataset = database_name + '.'
             self.engine = create_engine(connection_str)
-        print(pd.read_sql_query("""SELECT 'Connection OK'""", con = self.engine).iloc[0,0]) 
+            self.credentials = service_account.Credentials.from_service_account_file(credentials_path)
+            print(pd.read_gbq("""SELECT 'Connection OK'""",project_id = self.project_id,credentials = self.credentials).iloc[0,0]) 
+        else :
+            self.credentials = ''
+            self.dataset = ''
+            self.engine = create_engine(connection_str)
+            print(pd.read_sql_query("""SELECT 'Connection OK'""", con = self.engine).iloc[0,0]) 
 
     def sub_dump(self, df_in,table_name_in,mode_in) :
         """normal to_sql for dask's delayed in dump_main"""
-        df_in.to_sql(table_name_in, con = self.engine, index = False,if_exists = mode_in,chunksize = self.chunksize, method = self.method)
+        if (self.credentials != '') & (self.sql_type == 'BIGQUERY') :
+            print('{}{}'.format(self.dataset , table_name_in))
+            df_in.to_gbq('{}{}'.format(self.dataset , table_name_in),project_id = self.project_id
+                                        ,credentials = self.credentials , reauth = True, if_exists = mode_in)
+        else :
+            df_in.to_sql(table_name_in, con = self.engine, index = False,if_exists = mode_in,chunksize = self.chunksize, method = self.method)
         return len(df_in)
 
     def dump_main(self, df_in, table_name_in ,mode_in) :
@@ -125,10 +139,13 @@ class da_tran_SQL :
                         sql_q += """ {} = {}""".format(i, param[i])
                     n += 1
         else :
-            sql_q = """SELECT * FROM {}{}{}""".format(self.begin_name,table_name_in,self.end_name)
+            sql_q = """SELECT * FROM {}{}{}{}""".format(self.dataset,self.begin_name,table_name_in,self.end_name)
             if not condition_in == '' :
                 sql_q += """ WHERE """ + condition_in
-        return pd.read_sql_query(sql_q , con = self.engine)
+        if (self.credentials != '') & (self.sql_type == 'BIGQUERY') :
+            return pd.read_gbq(sql_q,project_id = self.project_id,credentials = self.credentials)
+        else :
+            return pd.read_sql_query(sql_q , con = self.engine)
 
     def write_logic_sql(self, key , value_in):
         """Write SQL Condition Query that include >, <, ="""
@@ -248,15 +265,9 @@ class da_tran_SQL :
         if table_name_in in list(self.engine.table_names()) :
             print('Start Filter Existing data from df at ',pd.Timestamp.now())
             #for single key
-            if 'str' in str(type(list_key))  :
-                if not list_key in df_in.columns :
-                    raise Exception("{} is not in df's columns".format(list_key))       
-                sql_q = 'select distinct '+ self.begin_name +  list_key + self.end_name +' from ' + table_name_in
-                filter_filter = pd.read_sql_query(sql_q, con = self.engine).iloc[:,0]
-                logic_filter = ~df_in[list_key].isin(filter_filter)
-
-            #for multi keys    
-            elif 'list' in str(type(list_key)) :
+            if 'str' in str(type(list_key))  :  list_key = [list_key]
+                
+            if 'list' in str(type(list_key)) :
                 if not min(x in df_in.columns for x in list_key) :
                     raise Exception("Some keys are not in df's columns")
                 i = 0
@@ -268,9 +279,13 @@ class da_tran_SQL :
                     df_in['key_sql_filter'] = df_in['key_sql_filter'].astype('str') + df_in[filter_name].astype('str')
                     sql_q += self.begin_name +  filter_name + self.end_name + ' ' 
                     i += 1
-                sql_q += ' FROM ' + table_name_in
+                sql_q += ' FROM ' + self.dataset + table_name_in
                 if debug : print(sql_q)
-                filter_filter = pd.read_sql_query(sql_q, con = self.engine)
+                if (self.credentials != '') & (self.sql_type == 'BIGQUERY') :
+                    filter_filter = pd.read_gbq(sql_q,project_id = self.project_id,credentials = self.credentials)
+                else :
+                    filter_filter = pd.read_sql_query(sql_q, con = self.engine)
+                # filter_filter = pd.read_sql_query(sql_q, con = self.engine)
                 filter_filter['key_sql_filter'] = ''
                 for i in filter_filter.columns :
                     if  i == 'key_sql_filter' : pass
