@@ -1,6 +1,5 @@
 import pandas as pd
 from sqlalchemy import create_engine
-from dask import delayed
 
 class da_tran_SQL :
     """interact with SQL"""
@@ -61,7 +60,9 @@ class da_tran_SQL :
         """Divide and Dump Dataframe"""
         if len(df_in) <= self.partition_size : sum_len = self.sub_dump(df_in,table_name_in,mode_in) 
         else :
-            if self.parallel_dump : dask_dump = delayed(self.sub_dump)
+            if self.parallel_dump : 
+                from dask import delayed
+                dask_dump = delayed(self.sub_dump)
             i, j, sum_len, df_length = 0, 1, 0, len(df_in)
             while i < df_length :
                 i_next = i + self.partition_size
