@@ -13,6 +13,7 @@ class da_tran_SQL :
         else : self.method = 'multi'
         self.partition_size = int(partition_size)
         self.parallel_dump = parallel_dump
+        if parallel_dump : print('Set to use parallel dump, there is a risk to use this method, use it with caution')
         self.max_parallel = int(max_parallel)
         type_dic = {
                     'MSSQL' : ['mssql', 'pymssql', '1433','[',']','EXEC'],
@@ -61,6 +62,7 @@ class da_tran_SQL :
         if len(df_in) <= self.partition_size : sum_len = self.sub_dump(df_in,table_name_in,mode_in) 
         else :
             if self.parallel_dump : 
+                print('About to use parallel dump, there is a risk to use this method, use it with caution')
                 from dask import delayed
                 dask_dump = delayed(self.sub_dump)
             i, j, sum_len, df_length = 0, 1, 0, len(df_in)
