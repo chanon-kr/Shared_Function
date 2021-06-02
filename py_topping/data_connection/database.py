@@ -4,7 +4,7 @@ from dask import delayed
 
 class da_tran_SQL :
     """interact with SQL"""
-    def __init__(self, sql_type, host_name, database_name, user = '', password = '' 
+    def __init__(self, sql_type, host_name, database_name, user = '', password = '' , credentials_path = ''
                 , chunksize = 150, partition_size = 5000, parallel_dump = False, max_parallel = 2, **kwargs):
         """Create connection to SQL Server"""
         sql_type = sql_type.upper()
@@ -34,15 +34,20 @@ class da_tran_SQL :
         else : additional_param = '?' + kwargs['parameter']
 
         self.begin_name, self.end_name, self.call_SP = type_dic[sql_type][3], type_dic[sql_type][4], type_dic[sql_type][5]
-
+        
         if (sql_type == 'SQLITE') & (kwargs.get('driver',None) == None) :
             connection_str = """{}:///{}{}""".format(type_dic[sql_type][0] , host_name , additional_param)
+        elif sql_type == 'BIGQUERY' :
+            connection_string = "{}://{}/{}".format(type_dic[sql_type][0],host_name,database_name)
         else :
             connection_str = """{}+{}://{}:{}@{}:{}/{}{}""".format(type_dic[sql_type][0],kwargs.get('driver',type_dic[sql_type][1])
                                                             ,user,password,host_name,kwargs.get('port',type_dic[sql_type][2])
                                                             ,database_name , additional_param)
         
-        self.engine = create_engine(connection_str)
+        if (credentials_path != '') & (sql_type == 'BIGQUERY') :
+            self.engine = create_engine(connection_str, credentials_path = credentials_path)
+        else :
+            self.engine = create_engine(connection_str)
         print(pd.read_sql_query("""SELECT 'Connection OK'""", con = self.engine).iloc[0,0]) 
 
     def sub_dump(self, df_in,table_name_in,mode_in) :
