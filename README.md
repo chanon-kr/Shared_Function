@@ -1,5 +1,5 @@
 # py_topping, a topping on some already great libraries
-## I create this library to make my team's projects easier and have VCS
+## I create this library to simplify and standardize my friends' projects
 
 PyPi Project Page : (https://pypi.org/project/py-topping)
 <br><br>To Install a Stable Version<br>
@@ -37,7 +37,7 @@ You could see samples of how to use this library inside the samples folder in gi
 ***
 ### database
   - Original to Work with SQL Server, MySQL, PostGreSQL and SQLite
-  - Can work with GCP's BigQuery, still need more test on Cloud
+  - Since 0.3.4, It can work with GCP's BigQuery, still need more test on Cloud
   - To read view, table or store procedure as pandas dataframe 
   - To insert pandas dataframe into SQL with option for existing row :
     - Replace same key(s) with new from dataframe with option to use ">" or "<" condition
@@ -46,12 +46,12 @@ You could see samples of how to use this library inside the samples folder in gi
   - Can parallel insert by using dask's delayed (not recommend)
   - Can't read Store Procedure in PostGreSQL and BigQuery will solve this in later version
   - Will working with Oracle Database in later version
-  - Dependencies for this library as listed ;
+  - Dependencies for this library as listed ;<br>
 ```sqlalchemy```
 ```pandas```
 ```dask```
 ```toolz```
-  - Additional dependencies for GCP's BigQuery as listed ;
+  - Additional dependencies for GCP's BigQuery as listed ;<br>
 ```pybigquery```
 ```pandas-gbq```
 ```google-cloud-bigquery```
