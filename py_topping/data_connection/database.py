@@ -2,7 +2,28 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 class da_tran_SQL :
-    """interact with SQL"""
+    """interact with SQL
+
+    :sql_type = string - type of database, support MSSQL, MYSQL, POSTGRESQL, SQLITE, BIGQUERY
+
+    :host_name = string 
+       - for MSSQL, MYSQL, POSTGRESQL : database's hostname or ip address
+       - for SQLITE : location of db file
+       - for BIGQUERY : project id on GCP
+
+    : database_name = string
+       - for MSSQL, MYSQL, POSTGRESQL : database's name
+       - for SQLITE : Leave as ''
+       - for BIGQUERY : dataset's name
+
+    : user = string - User for MSSQL, MYSQL, POSTGRESQL
+
+    : password = string - password for MSSQL, MYSQL, POSTGRESQL
+    
+    : credentials_path = string - path to GCP credentials file (json)
+
+    more sample of this class at https://github.com/chanon-kr/Shared_Function/blob/main/samples/database.ipynb
+    """
     def __init__(self, sql_type, host_name, database_name, user = '', password = '' , credentials_path = ''
                 , chunksize = 150, partition_size = 5000, parallel_dump = False, max_parallel = 2, **kwargs):
         """Create connection to SQL Server"""
