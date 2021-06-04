@@ -116,7 +116,7 @@ class da_tran_SQL :
         return sum_len
 
 
-    def read(self, table_name_in, condition_in = '', SP = False, param = ''):
+    def read(self, table_name_in, condition_in = '', SP = False,raw = False, param = ''):
         """Read Table or View or Store Procedure"""
         if SP :
             if self.sql_type == 'POSTGRESQL' : return 'SP/Function None Avaliable for PostgreSQL, right now'
@@ -139,6 +139,7 @@ class da_tran_SQL :
                         if n > 0 : sql_q += ' , '
                         sql_q += """ {} = {}""".format(i, param[i])
                     n += 1
+        elif raw : sql_q = str(table_name_in)
         else :
             sql_q = """SELECT * FROM {}{}{}{}""".format(self.dataset,self.begin_name,table_name_in,self.end_name)
             if not condition_in == '' :
