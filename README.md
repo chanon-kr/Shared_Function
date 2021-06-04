@@ -12,13 +12,12 @@ pip install py-topping
 pip install git+https://github.com/chanon-kr/Shared_Function.git
 ```
 <br>
+This library will auto install dependencies for you but you could see the list of dependencies below<br><br>
 You could see samples of how to use this library inside the samples folder in github<br>
 (https://github.com/chanon-kr/Shared_Function)
 <br><br>
 
 
-***
-## data_connection
 ***
 ### sharepoint
   - to download file from SP365 or SP on prim
@@ -27,6 +26,7 @@ You could see samples of how to use this library inside the samples folder in gi
   - upload file to SP365 or SP on prim
   - Dependencies for this library as listed ;
 ```Office365-REST-Python-Client (recommend 2.2.1)```
+  - Sample of use => https://github.com/chanon-kr/Shared_Function/blob/main/samples/sharepoint.ipynb
 <br><br>
 ***
 ### gcp
@@ -34,6 +34,7 @@ You could see samples of how to use this library inside the samples folder in gi
   - upload file from GCP's bucket Storage
   - Dependencies for this library as listed ;
 ```...```
+  - Sample of use => Add Later
 <br><br>
 ***
 ### database
@@ -45,7 +46,7 @@ You could see samples of how to use this library inside the samples folder in gi
     - Add Only row with non-existing key(s)
     - Replace whole table
   - Can parallel insert by using dask's delayed (not recommend)
-  - Can't read Store Procedure in PostGreSQL and BigQuery will solve this in later version
+  - Can't read Store Procedure in PostGreSQL will solve this in later version
   - Will working with Oracle Database in later version
   - Dependencies for this library as listed ;<br>
 ```sqlalchemy```
@@ -57,10 +58,10 @@ You could see samples of how to use this library inside the samples folder in gi
 ```pandas-gbq```
 ```google-cloud-bigquery```
 ```google-cloud-bigquery-storage```
+ - Sample of use => https://github.com/chanon-kr/Shared_Function/blob/main/samples/database.ipynb
 <br><br>
 ***
-## data_preparation
-***
+### data_preparation
   - Encode categorical column
   - Create lagging parameter
   - Simple Deep Learning Model for Regression
@@ -68,18 +69,21 @@ You could see samples of how to use this library inside the samples folder in gi
 ```pandas```
 ```sklearn```
 ```tensorflow>=2```
+  - Sample of use  
+    - Data Prep => https://github.com/chanon-kr/Shared_Function/blob/main/samples/data_preparation.ipynb
+    - Simple Deep Learning => https://github.com/chanon-kr/Shared_Function/blob/main/samples/lazy_ml.ipynb
 <br><br>
 ***
-## general_use
-***
 ### general_use
-  - To send email with python
+  - To send email with python 
   - To logging in csv file
   - To check port status
   - To send LINE message, sticker or picture with line notify
+  - Sample of use 
+    - LINE => https://github.com/chanon-kr/Shared_Function/blob/main/samples/lazy_LINE.ipynb
+    - EMAIL => https://github.com/chanon-kr/Shared_Function/blob/main/samples/email_sender.ipynb
+    - Other => https://github.com/chanon-kr/Shared_Function/blob/main/samples/other_function.ipynb
 
-***
-## run_pipeline
 ***
 ### run_pipeline
   - to run your python or notebook scripts 
@@ -88,3 +92,4 @@ You could see samples of how to use this library inside the samples folder in gi
     - with emailing the log when have/don't have errors
     - Dependencies for this library as listed ;
 ```papermill```
+  - Sample of use  => https://github.com/chanon-kr/Shared_Function/blob/main/samples/run_pipeline.ipynb
