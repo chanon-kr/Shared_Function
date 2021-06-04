@@ -12,7 +12,7 @@ pip install py-topping
 pip install git+https://github.com/chanon-kr/Shared_Function.git
 ```
 <br>
-This library will auto install dependencies for you but you could see the list of dependencies below<br><br>
+This library will **NOT** auto install dependencies for you but you could see the list of dependencies below<br><br>
 You could see samples of how to use this library inside the samples folder in github<br>
 (https://github.com/chanon-kr/Shared_Function)
 <br><br>
