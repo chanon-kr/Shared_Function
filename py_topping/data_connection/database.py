@@ -24,7 +24,7 @@ class da_tran_SQL :
 
     more sample of this class at https://github.com/chanon-kr/Shared_Function/blob/main/samples/database.ipynb
     """
-    def __init__(self, sql_type, host_name, database_name, user = '', password = '' , credentials_path = ''
+    def __init__(self, sql_type, host_name, database_name, user = '', password = '' , credentials_path = None
                 , chunksize = 150, partition_size = 5000, parallel_dump = False, max_parallel = 2, **kwargs):
         """Create connection to SQL Server"""
         sql_type = sql_type.upper()
@@ -74,7 +74,8 @@ class da_tran_SQL :
             # self.dataset = self.begin_name + database_name + self.end_name + '.'
             self.dataset = database_name + '.'
             self.engine = create_engine(connection_str)
-            self.credentials = service_account.Credentials.from_service_account_file(credentials_path)
+            if credentials_path == None : self.credentials = None
+            else : self.credentials = service_account.Credentials.from_service_account_file(credentials_path)
             print(pd.read_gbq("""SELECT 'Connection OK'""",project_id = self.project_id,credentials = self.credentials).iloc[0,0]) 
         else :
             self.credentials = ''
@@ -85,7 +86,7 @@ class da_tran_SQL :
     def sub_dump(self, df_in,table_name_in,mode_in) :
         """normal to_sql for dask's delayed in dump_main"""
         if (self.credentials != '') & (self.sql_type == 'BIGQUERY') :
-            print('{}{}'.format(self.dataset , table_name_in))
+            # print('{}{}'.format(self.dataset , table_name_in))
             df_in.to_gbq('{}{}'.format(self.dataset , table_name_in),project_id = self.project_id
                                         ,credentials = self.credentials , reauth = True, if_exists = mode_in)
         else :
