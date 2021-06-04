@@ -120,14 +120,14 @@ class da_tran_SQL :
         """Read Table or View or Store Procedure"""
         if SP :
             if self.sql_type == 'POSTGRESQL' : return 'SP/Function None Avaliable for PostgreSQL, right now'
-            sql_q = self.call_SP + ' ' + table_name_in + ' '
+            sql_q = self.call_SP + ' ' + self.dataset + table_name_in + ' '
             if param == '' : raise Exception("Please insert SP's parameter")
             elif type(param) != dict : raise Exception("param must be dict")
             else :
                 n = 0
                 for i in param.keys() :
                     if type(param[i]) == str : param[i] = """'{}'""".format(param[i])
-                    if self.sql_type in ['MYSQL','POSTGRESQL'] : 
+                    if self.sql_type in ['MYSQL','POSTGRESQL','BIGQUERY'] : 
                         if n == 0 : sql_q += ' (' 
                         else : sql_q += ' , '
                         sql_q += """ {}""".format(param[i])
