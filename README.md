@@ -17,29 +17,10 @@ You could see samples of how to use this library inside the samples folder in gi
 (https://github.com/chanon-kr/Shared_Function)
 <br><br>
 
-
-***
-### sharepoint
-  - to download file from SP365 or SP on prim
-  - to read csv/excel from SP365 as pandas dataframe
-  - to download List as csv or pandas dataframe from SP365
-  - upload file to SP365 or SP on prim
-  - Dependencies for this library as listed ;
-```Office365-REST-Python-Client (recommend 2.2.1)```
-  - Sample of use => https://github.com/chanon-kr/Shared_Function/blob/main/samples/sharepoint.ipynb
-<br><br>
-***
-### gcp
-  - to download file from GCP's bucket Storage
-  - upload file from GCP's bucket Storage
-  - Dependencies for this library as listed ;
-```...```
-  - Sample of use => Add Later
-<br><br>
 ***
 ### database
   - Original to Work with SQL Server, MySQL, PostGreSQL and SQLite
-  - Since 0.3.4, It can work with GCP's BigQuery, still need more test on Cloud
+  - Since 0.3.5, It can work with GCP's BigQuery, still need more test on Cloud
   - To read view, table or store procedure as pandas dataframe 
   - To insert pandas dataframe into SQL with option for existing row :
     - Replace same key(s) with new from dataframe with option to use ">" or "<" condition
@@ -60,6 +41,25 @@ You could see samples of how to use this library inside the samples folder in gi
 ```google-cloud-bigquery-storage```
  - Sample of use => https://github.com/chanon-kr/Shared_Function/blob/main/samples/database.ipynb
 <br><br>
+***
+### sharepoint
+  - to download file from SP365 or SP on prim
+  - to read csv/excel from SP365 as pandas dataframe
+  - to download List as csv or pandas dataframe from SP365
+  - upload file to SP365 or SP on prim
+  - Dependencies for this library as listed ;
+```Office365-REST-Python-Client (recommend 2.2.1)```
+  - Sample of use => https://github.com/chanon-kr/Shared_Function/blob/main/samples/sharepoint.ipynb
+<br><br>
+***
+### gcp
+  - to download file from GCP's bucket Storage
+  - upload file from GCP's bucket Storage
+  - Dependencies for this library as listed ;
+```...```
+  - Sample of use => Add Later
+<br><br>
+
 ***
 ### data_preparation
   - Encode categorical column
