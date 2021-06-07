@@ -40,7 +40,6 @@ You could see samples of how to use this library inside the samples folder in gi
 ```google-cloud-bigquery```
 ```google-cloud-bigquery-storage```
  - Sample of use => https://github.com/chanon-kr/Shared_Function/blob/main/samples/database.ipynb
-<br>
 
 ***
 ### sharepoint
@@ -51,7 +50,6 @@ You could see samples of how to use this library inside the samples folder in gi
   - Dependencies for this library as listed ;
 ```Office365-REST-Python-Client (recommend 2.2.1)```
   - Sample of use => https://github.com/chanon-kr/Shared_Function/blob/main/samples/sharepoint.ipynb
-<br>
 
 ***
 ### gcp
@@ -60,7 +58,6 @@ You could see samples of how to use this library inside the samples folder in gi
   - Dependencies for this library as listed ;
 ```...```
   - Sample of use => Add Later
-<br>
 
 ***
 ### data_preparation
@@ -74,7 +71,6 @@ You could see samples of how to use this library inside the samples folder in gi
   - Sample of use  
     - Data Prep => https://github.com/chanon-kr/Shared_Function/blob/main/samples/data_preparation.ipynb
     - Simple Deep Learning => https://github.com/chanon-kr/Shared_Function/blob/main/samples/lazy_ml.ipynb
-<br>
 
 ***
 ### general_use
@@ -86,7 +82,6 @@ You could see samples of how to use this library inside the samples folder in gi
     - LINE => https://github.com/chanon-kr/Shared_Function/blob/main/samples/lazy_LINE.ipynb
     - EMAIL => https://github.com/chanon-kr/Shared_Function/blob/main/samples/email_sender.ipynb
     - Other => https://github.com/chanon-kr/Shared_Function/blob/main/samples/other_function.ipynb
-<br>
 
 ***
 ### run_pipeline
