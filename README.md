@@ -1,6 +1,6 @@
 # py_topping, a topping on some already great libraries
 ## I create this library to simplify and standardize my friends' projects
-This library focus on "simplify" (& lazy) not performance <br><br>
+This library focus on "simplify" (& lazy) not performance <br>
 
 PyPi Project Page : (https://pypi.org/project/py-topping)
 <br><br>To Install a Stable Version<br>
@@ -12,7 +12,7 @@ pip install py-topping
 pip install git+https://github.com/chanon-kr/Shared_Function.git
 ```
 <br>
-This library will **NOT** auto install dependencies for you but you could see the list of dependencies below<br><br>
+This library will *NOT auto install dependencies for you but you could see the list of dependencies below<br><br>
 You could see samples of how to use this library inside the samples folder in github<br>
 (https://github.com/chanon-kr/Shared_Function)
 <br><br>
@@ -40,7 +40,7 @@ You could see samples of how to use this library inside the samples folder in gi
 ```google-cloud-bigquery```
 ```google-cloud-bigquery-storage```
  - Sample of use => https://github.com/chanon-kr/Shared_Function/blob/main/samples/database.ipynb
-<br><br>
+<br>
 ***
 ### sharepoint
   - to download file from SP365 or SP on prim
@@ -50,7 +50,7 @@ You could see samples of how to use this library inside the samples folder in gi
   - Dependencies for this library as listed ;
 ```Office365-REST-Python-Client (recommend 2.2.1)```
   - Sample of use => https://github.com/chanon-kr/Shared_Function/blob/main/samples/sharepoint.ipynb
-<br><br>
+<br>
 ***
 ### gcp
   - to download file from GCP's bucket Storage
@@ -58,8 +58,7 @@ You could see samples of how to use this library inside the samples folder in gi
   - Dependencies for this library as listed ;
 ```...```
   - Sample of use => Add Later
-<br><br>
-
+<br>
 ***
 ### data_preparation
   - Encode categorical column
@@ -72,7 +71,7 @@ You could see samples of how to use this library inside the samples folder in gi
   - Sample of use  
     - Data Prep => https://github.com/chanon-kr/Shared_Function/blob/main/samples/data_preparation.ipynb
     - Simple Deep Learning => https://github.com/chanon-kr/Shared_Function/blob/main/samples/lazy_ml.ipynb
-<br><br>
+<br>
 ***
 ### general_use
   - To send email with python 
@@ -83,7 +82,7 @@ You could see samples of how to use this library inside the samples folder in gi
     - LINE => https://github.com/chanon-kr/Shared_Function/blob/main/samples/lazy_LINE.ipynb
     - EMAIL => https://github.com/chanon-kr/Shared_Function/blob/main/samples/email_sender.ipynb
     - Other => https://github.com/chanon-kr/Shared_Function/blob/main/samples/other_function.ipynb
-
+<br>
 ***
 ### run_pipeline
   - to run your python or notebook scripts 
