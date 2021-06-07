@@ -1,6 +1,6 @@
 # py_topping, a topping on some already great libraries
 ## I create this library to simplify and standardize my friends' projects
-This library focus on "simplify" (& lazy) not performance <br>
+This library focus on "simplify" (& lazy) not performance <br><br>
 
 PyPi Project Page : (https://pypi.org/project/py-topping)
 <br><br>To Install a Stable Version<br>
@@ -15,8 +15,7 @@ pip install git+https://github.com/chanon-kr/Shared_Function.git
 This library will *NOT auto install dependencies for you but you could see the list of dependencies below<br><br>
 You could see samples of how to use this library inside the samples folder in github<br>
 (https://github.com/chanon-kr/Shared_Function)
-<br><br>
-
+<br>
 ***
 ### database
   - Original to Work with SQL Server, MySQL, PostGreSQL and SQLite
@@ -41,6 +40,7 @@ You could see samples of how to use this library inside the samples folder in gi
 ```google-cloud-bigquery-storage```
  - Sample of use => https://github.com/chanon-kr/Shared_Function/blob/main/samples/database.ipynb
 <br>
+
 ***
 ### sharepoint
   - to download file from SP365 or SP on prim
@@ -51,6 +51,7 @@ You could see samples of how to use this library inside the samples folder in gi
 ```Office365-REST-Python-Client (recommend 2.2.1)```
   - Sample of use => https://github.com/chanon-kr/Shared_Function/blob/main/samples/sharepoint.ipynb
 <br>
+
 ***
 ### gcp
   - to download file from GCP's bucket Storage
@@ -59,6 +60,7 @@ You could see samples of how to use this library inside the samples folder in gi
 ```...```
   - Sample of use => Add Later
 <br>
+
 ***
 ### data_preparation
   - Encode categorical column
@@ -72,6 +74,7 @@ You could see samples of how to use this library inside the samples folder in gi
     - Data Prep => https://github.com/chanon-kr/Shared_Function/blob/main/samples/data_preparation.ipynb
     - Simple Deep Learning => https://github.com/chanon-kr/Shared_Function/blob/main/samples/lazy_ml.ipynb
 <br>
+
 ***
 ### general_use
   - To send email with python 
@@ -83,6 +86,7 @@ You could see samples of how to use this library inside the samples folder in gi
     - EMAIL => https://github.com/chanon-kr/Shared_Function/blob/main/samples/email_sender.ipynb
     - Other => https://github.com/chanon-kr/Shared_Function/blob/main/samples/other_function.ipynb
 <br>
+
 ***
 ### run_pipeline
   - to run your python or notebook scripts 
