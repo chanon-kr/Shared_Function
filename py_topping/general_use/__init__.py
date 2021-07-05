@@ -129,3 +129,8 @@ def check_port(ip = None, port = None):
         print("Port is open")
     else:
         print("Port is not open")
+
+def check_utc(utc_target) :
+    current_utc = (datetime.now() - datetime.utcnow())
+    current_utc = current_utc.total_seconds()/3600
+    return int(round(utc_target - current_utc,0))
