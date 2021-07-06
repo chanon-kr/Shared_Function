@@ -2,7 +2,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 class da_tran_SQL :
-    """interact with SQL
+    """interact with SQL : Update 2021-07-06
 
     :sql_type = string - type of database, support MSSQL, MYSQL, POSTGRESQL, SQLITE, BIGQUERY
 
@@ -209,8 +209,8 @@ class da_tran_SQL :
 
         return logic_query
 
-    def dump_replace(self, df_in, table_name_in, list_key, math_logic = '',debug = False):
-        """Delete exists row of table in database with same key(s) as df and dump df append to table"""
+    def delete_old_data(self, df_in, table_name_in, list_key, math_logic, debug) :
+        """Sub Function in dump_replace to delete row in target table"""
         #Create SQL Query for Delete
         sql_q = """DELETE FROM {}{}{} where """.format(self.begin_name,table_name_in,self.end_name)
 
@@ -244,8 +244,18 @@ class da_tran_SQL :
             print('Delete Last '+str(list_key)+' at',pd.Timestamp.now())
         else :
             print('Do not have table to delete at',pd.Timestamp.now())
-            
-        print('Dump data to ',table_name_in,' Begin ',pd.Timestamp.now())
+
+    def dump_replace(self, df_in, table_name_in, list_key, math_logic = '', partition_delete = 100000, debug = False):
+        """Delete exists row of table in database with same key(s) as df and dump df append to table"""
+        if len(df_in) <= partition_delete : 
+            self.delete_old_data(df_in, table_name_in, list_key, math_logic, debug)
+        else :
+            i, df_length = 0, len(df_in)
+            while i < df_length :
+                i_next = i + partition_delete
+                print("Processing {}-{} row from {} rows".format(i + 1, i_next, df_length))
+                self.delete_old_data(df_in.iloc[i:i_next,:],table_name_in, list_key, math_logic, debug)
+                i += partition_delete
         #Dump df_in append to database
         self.dump_main(df_in, table_name_in ,mode_in = 'append')
         print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
