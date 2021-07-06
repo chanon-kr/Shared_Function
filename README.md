@@ -57,7 +57,7 @@ You could see samples of how to use this library inside the samples folder in gi
   - upload file from GCP's bucket Storage
   - Dependencies for this library as listed ;
 ```...```
-  - Sample of use => Add Later
+  - Sample of use => https://github.com/chanon-kr/Shared_Function/blob/main/samples/gcp.ipynb
 
 ***
 ### data_preparation
