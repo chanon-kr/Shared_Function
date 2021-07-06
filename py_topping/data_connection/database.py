@@ -165,17 +165,17 @@ class da_tran_SQL :
 
     def dump_whole(self, df_in, table_name_in , fix_table = False, debug = False) :
         """Delete exists table and replace with new df"""
-        try :
+        if table_name_in in list(self.engine.table_names()) :
             if fix_table : 
                 print('Delete Existing data from Table at ',pd.Timestamp.now())
                 self.engine.execute("""DELETE FROM {}{}{}""".format(self.begin_name,table_name_in,self.end_name))
             else :
                 print('Drop Existing Table at ',pd.Timestamp.now())
                 self.engine.execute("""DROP TABLE {}{}{}""".format(self.begin_name,table_name_in,self.end_name))
-        except Exception as e:
-            print('Delete error or Do not have table to delete at',pd.Timestamp.now())
-            if debug : print(e)
+        else :
+            print('Do not have table to delete at',pd.Timestamp.now())
         #Dump df_in to database
+        print('Dump data to ',table_name_in,' Begin ',pd.Timestamp.now())
         self.dump_main( df_in, table_name_in ,mode_in = 'append') 
         print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
 
@@ -218,16 +218,9 @@ class da_tran_SQL :
         else : logic_list = ['There_is_no_logic_math_need_to_write'] # column in logic_list will never be true
 
         #for single key
-        if 'str' in str(type(list_key))  :
-            if not list_key in df_in.columns :
-                raise Exception("{} is not in df's columns".format(list_key))
-            if list_key in logic_list :
-                sql_q += self.write_logic_sql(list_key, math_logic[list_key])
-            else :  
-                sql_q += self.write_in_sql(df_in,list_key)
-
-        #for multi keys    
-        elif 'list' in str(type(list_key)) :
+        if 'str' in str(type(list_key))  :  list_key = [list_key]
+         
+        if 'list' in str(type(list_key)) :
             if not min(x in df_in.columns for x in list_key) :
                 raise Exception("Some keys are not in df's columns")
             i = 0
@@ -239,24 +232,21 @@ class da_tran_SQL :
                     sql_q += self.write_in_sql(df_in,filter_name)
                 i += 1
                 if i < len(list_key) : sql_q += ' and '
-
         #if key is not either string or list
         else :
             raise Exception("List of Key must be string or list")
         
         #Delete exiting row from table
-        try :
+        if table_name_in in list(self.engine.table_names()) :
             print('Start delete old data at',pd.Timestamp.now())
+            if debug : print(sql_q)
             self.engine.execute(sql_q)
             print('Delete Last '+str(list_key)+' at',pd.Timestamp.now())
-        except Exception as e:
-            print('Delete error or Do not have table to delete at',pd.Timestamp.now())
-            if debug : print(e)
-            pass
+        else :
+            print('Do not have table to delete at',pd.Timestamp.now())
             
-        if debug : print(sql_q)
+        print('Dump data to ',table_name_in,' Begin ',pd.Timestamp.now())
         #Dump df_in append to database
-        #df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'append',chunksize = self.chunksize, method = 'multi')
         self.dump_main(df_in, table_name_in ,mode_in = 'append')
         print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
 
@@ -266,19 +256,21 @@ class da_tran_SQL :
         # Check if Table existing or not
         if table_name_in in list(self.engine.table_names()) :
             print('Start Filter Existing data from df at ',pd.Timestamp.now())
+            
+            df_out = df_in.copy()
             #for single key
             if 'str' in str(type(list_key))  :  list_key = [list_key]
-                
+
             if 'list' in str(type(list_key)) :
-                if not min(x in df_in.columns for x in list_key) :
+                if not min(x in df_out.columns for x in list_key) :
                     raise Exception("Some keys are not in df's columns")
                 i = 0
-                df_in['key_sql_filter'] = ''
+                df_out['key_sql_filter'] = ''
                 sql_q = 'SELECT DISTINCT '
                 while i < len(list_key) :
                     filter_name = list_key[i]
                     if i != 0 : sql_q += ' , '
-                    df_in['key_sql_filter'] = df_in['key_sql_filter'].astype('str') + df_in[filter_name].astype('str')
+                    df_out['key_sql_filter'] = df_out['key_sql_filter'].astype('str') + df_out[filter_name].astype('str')
                     sql_q += self.begin_name +  filter_name + self.end_name + ' ' 
                     i += 1
                 sql_q += ' FROM ' + self.dataset + table_name_in
@@ -294,21 +286,21 @@ class da_tran_SQL :
                     else : filter_filter['key_sql_filter'] = filter_filter['key_sql_filter'].astype('str') + filter_filter[i].astype('str')
                 if debug : print(filter_filter.head())
                 filter_filter = filter_filter['key_sql_filter'].unique()
-                if debug : print('======filter======\n',filter_filter,'\n======in======\n',df_in.head())
-                logic_filter = ~df_in['key_sql_filter'].isin(filter_filter)
-                df_in = df_in.drop('key_sql_filter', axis = 1)
+                if debug : print('======filter======\n',filter_filter,'\n======in======\n',df_out.head())
+                logic_filter = ~df_out['key_sql_filter'].isin(filter_filter)
+                df_out = df_out.drop('key_sql_filter', axis = 1)
 
             #if key is not either string or list
             else :
                 raise Exception("List of Key must be string or list")
 
-            df_in = df_in[logic_filter]
+            df_out = df_out[logic_filter]
             
         else : print('Table not existing at ',pd.Timestamp.now())
 
         #Dump df_in append to database
-        #df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'append',chunksize = self.chunksize, method = 'multi')
-        self.dump_main( df_in, table_name_in ,mode_in = 'append') 
+        print('Dump data to ',table_name_in,' Begin ',pd.Timestamp.now())
+        self.dump_main( df_out, table_name_in ,mode_in = 'append') 
         print('Dump data to ',table_name_in,' End ', pd.Timestamp.now())
 
     def dump_new_old(self, df_in, table_name_in, list_key) :
@@ -345,6 +337,5 @@ class da_tran_SQL :
         df_in = df_in[logic_filter]
 
         #Dump df_in append to database
-        #df_in.to_sql(table_name_in,con = self.engine,index = False,if_exists = 'append',chunksize = self.chunksize, method = 'multi')
         self.dump_main(df_in, table_name_in ,mode_in = 'append')
         print('Dump data to ',table_name_in,' End ', pd.Timestamp.now())
