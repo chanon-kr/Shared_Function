@@ -39,6 +39,7 @@ You could see samples of how to use this library inside the samples folder in gi
 ```pandas-gbq```
 ```google-cloud-bigquery```
 ```google-cloud-bigquery-storage```
+```pyarrow```
  - Sample of use => https://github.com/chanon-kr/Shared_Function/blob/main/samples/database.ipynb
 
 ***
@@ -56,6 +57,7 @@ You could see samples of how to use this library inside the samples folder in gi
   - to download file from GCP's bucket Storage
   - upload file from GCP's bucket Storage
   - Dependencies for this library as listed ;
+```google-cloud-storage```
 ```...```
   - Sample of use => https://github.com/chanon-kr/Shared_Function/blob/main/samples/gcp.ipynb
 
