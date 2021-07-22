@@ -2,7 +2,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 class da_tran_SQL :
-    """interact with SQL : Update 2021-07-06
+    """interact with SQL : Update 2021-07-22
 
     :sql_type = string - type of database, support MSSQL, MYSQL, POSTGRESQL, SQLITE, BIGQUERY
 
