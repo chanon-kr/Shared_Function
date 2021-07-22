@@ -247,18 +247,21 @@ class da_tran_SQL :
 
     def dump_replace(self, df_in, table_name_in, list_key, math_logic = '', partition_delete = 100000, debug = False):
         """Delete exists row of table in database with same key(s) as df and dump df append to table"""
-        if len(df_in) <= partition_delete : 
-            self.delete_old_data(df_in, table_name_in, list_key, math_logic, debug)
+        if len(df_in) == 0 : 
+            print('No Data to dump into',table_name_in,' End ',pd.Timestamp.now())
         else :
-            i, df_length = 0, len(df_in)
-            while i < df_length :
-                i_next = i + partition_delete
-                print("Processing {}-{} row from {} rows".format(i + 1, i_next, df_length))
-                self.delete_old_data(df_in.iloc[i:i_next,:],table_name_in, list_key, math_logic, debug)
-                i += partition_delete
-        #Dump df_in append to database
-        self.dump_main(df_in, table_name_in ,mode_in = 'append')
-        print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
+            if len(df_in) <= partition_delete : 
+                self.delete_old_data(df_in, table_name_in, list_key, math_logic, debug)
+            else :
+                i, df_length = 0, len(df_in)
+                while i < df_length :
+                    i_next = i + partition_delete
+                    print("Processing {}-{} row from {} rows".format(i + 1, i_next, df_length))
+                    self.delete_old_data(df_in.iloc[i:i_next,:],table_name_in, list_key, math_logic, debug)
+                    i += partition_delete
+            #Dump df_in append to database
+            self.dump_main(df_in, table_name_in ,mode_in = 'append')
+            print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
 
     def dump_new(self, df_in, table_name_in, list_key , debug = False) :
         """Delete exists row of df that has same key(s) as table and dump df_in append to table"""
