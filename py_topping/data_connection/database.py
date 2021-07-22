@@ -120,8 +120,14 @@ class da_tran_SQL :
         return sum_len
 
 
-    def read(self, table_name_in, condition_in = '', SP = False,raw = False, param = ''):
+    def read(self, table_name_in, condition_in = '', SP = False,raw = False, param = '', columns_list = []):
         """Read Table or View or Store Procedure"""
+        columns_read = ''
+        if len(columns_list) == 0 :columns_read = '*'
+        else : 
+            for i in columns_list :
+                if columns_read != '' : columns_read += ', '
+                columns_read += '{}{}{}.{}{}{}'.format(self.begin_name,table_name_in,self.end_name  ,  self.begin_name,i,self.end_name)
         if SP :
             if self.sql_type == 'POSTGRESQL' : return 'SP/Function None Avaliable for PostgreSQL, right now'
             sql_q = self.call_SP + ' ' + self.dataset + table_name_in + ' '
@@ -145,7 +151,7 @@ class da_tran_SQL :
                     n += 1
         elif raw : sql_q = str(table_name_in)
         else :
-            sql_q = """SELECT * FROM {}{}{}{}""".format(self.dataset,self.begin_name,table_name_in,self.end_name)
+            sql_q = """SELECT {} FROM {}{}{}{}""".format(columns_read, self.dataset,self.begin_name,table_name_in,self.end_name)
             if not condition_in == '' :
                 sql_q += """ WHERE """ + condition_in
         if (self.credentials != '') & (self.sql_type == 'BIGQUERY') :
