@@ -1,5 +1,6 @@
 import pandas as pd
 from sqlalchemy import create_engine
+import os
 
 class da_tran_SQL :
     """interact with SQL : Update 2021-07-22
@@ -74,11 +75,14 @@ class da_tran_SQL :
             # self.dataset = self.begin_name + database_name + self.end_name + '.'
             self.dataset = database_name + '.'
             self.engine = create_engine(connection_str)
-            if credentials_path == None : self.credentials = None
-            else : self.credentials = service_account.Credentials.from_service_account_file(credentials_path)
+            if credentials_path == None : self.credentials, self.credentials_path = None, None
+            else : 
+                self.credentials = service_account.Credentials.from_service_account_file(credentials_path)
+                self.credentials_path = credentials_path
             print(pd.read_gbq("""SELECT 'Connection OK'""",project_id = self.project_id,credentials = self.credentials).iloc[0,0]) 
         else :
             self.credentials = ''
+            self.credentials_path  = None
             self.dataset = ''
             self.engine = create_engine(connection_str)
             print(pd.read_sql_query("""SELECT 'Connection OK'""", con = self.engine).iloc[0,0]) 
@@ -168,9 +172,11 @@ class da_tran_SQL :
         if table_name_in in list(self.engine.table_names()) :
             if fix_table : 
                 print('Delete Existing data from Table at ',pd.Timestamp.now())
+                if self.credentials_path != None : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials_path
                 self.engine.execute("""DELETE FROM {}{}{}""".format(self.begin_name,table_name_in,self.end_name))
             else :
                 print('Drop Existing Table at ',pd.Timestamp.now())
+                if self.credentials_path != None : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials_path
                 self.engine.execute("""DROP TABLE {}{}{}""".format(self.begin_name,table_name_in,self.end_name))
         else :
             print('Do not have table to delete at',pd.Timestamp.now())
@@ -240,6 +246,7 @@ class da_tran_SQL :
         if table_name_in in list(self.engine.table_names()) :
             print('Start delete old data at',pd.Timestamp.now())
             if debug : print(sql_q)
+            if self.credentials_path != None : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials_path
             self.engine.execute(sql_q)
             print('Delete Last '+str(list_key)+' at',pd.Timestamp.now())
         else :
