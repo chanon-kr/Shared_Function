@@ -52,8 +52,8 @@ def create_lag(df_in , col_in , lag_range , lag_name = 'lag' , drop_null = True,
     if drop_null : df_out = df_out[df_out[lag_col].notnull().min(axis = 1) != 0]
     return df_out
 
-class lazy_Tree :
-    """Explan Decision Tree Logic, Need More Optimize"""
+class lazy_treereason :
+    """Explan Decision Tree Logic, Need More Optimize and Naming"""
     def __init__(self, model, feature_list, max_depth = 1000, spacing = 1, decimals = 4) :
         list_logic = export_text(model, feature_names=feature_list, max_depth = max_depth, spacing=spacing,decimals=decimals)
         list_logic = list_logic.split('\n')
@@ -82,11 +82,11 @@ class lazy_Tree :
                     buffer = buffer[(~buffer['depth'].isin(buffer[buffer['group'] == j]['depth']))|(buffer['group'] >= j)]
             buffer['group'] = int(i)
             all_logic = all_logic.append(buffer)
+        self.logic_str = list_logic[:]
         self.feature_list = feature_list[:]
         self.logic_frame = all_logic.reset_index(drop = True)
 
-
-    def mapping(self, x, logic = self.logic_frame, asframe = False):
+    def explan(self, x, logic = self.logic_frame, asframe = False):
         operator_dict = {'>' : lambda x,y : x > y,'>=' : lambda x,y : x >= y
                         ,'<' : lambda x,y : x < y,'<=' : lambda x,y : x <= y
                         ,'==' : lambda x,y : x == y}
