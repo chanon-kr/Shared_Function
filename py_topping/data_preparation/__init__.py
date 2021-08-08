@@ -84,7 +84,9 @@ class lazy_treereason :
         self.logic_str = list_logic[:]
         self.feature_list = feature_list[:]
         self.logic_frame = all_logic.reset_index(drop = True)
-    def explan(self, x, logic = self.logic_frame, asframe = False):
+    
+    def explan(self, x, logic = None, asframe = False):
+        if logic == None : logic = self.logic_frame
         operator_dict = {'>' : lambda x,y : x > y,'>=' : lambda x,y : x >= y
                         ,'<' : lambda x,y : x < y,'<=' : lambda x,y : x <= y
                         ,'==' : lambda x,y : x == y}
