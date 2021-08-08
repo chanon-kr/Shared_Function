@@ -70,7 +70,6 @@ class lazy_treereason :
         df_logic['operator'] = np.where(df_logic['end'], np.NaN, df_logic['logic'].apply(lambda x : x[1]))
         df_logic['value'] = np.where(df_logic['end'], np.NaN, df_logic['logic'].apply(lambda x : x[-1]))
         df_logic['output'] = np.where(df_logic['end'], df_logic['logic'], np.NaN)
-
         all_logic = pd.DataFrame()
         for i in df_logic['group'].unique() :
             buffer = all_logic.append(df_logic[df_logic['group'] == i])
@@ -85,7 +84,6 @@ class lazy_treereason :
         self.logic_str = list_logic[:]
         self.feature_list = feature_list[:]
         self.logic_frame = all_logic.reset_index(drop = True)
-
     def explan(self, x, logic = self.logic_frame, asframe = False):
         operator_dict = {'>' : lambda x,y : x > y,'>=' : lambda x,y : x >= y
                         ,'<' : lambda x,y : x < y,'<=' : lambda x,y : x <= y
