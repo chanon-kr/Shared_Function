@@ -1,5 +1,7 @@
-import pandas as pd
 from sklearn.preprocessing import LabelEncoder
+from sklearn.tree import export_text
+import pandas as pd
+import numpy as np
 import os
 from joblib import dump, load
 
@@ -49,3 +51,53 @@ def create_lag(df_in , col_in , lag_range , lag_name = 'lag' , drop_null = True,
         lag_col += col_buf
     if drop_null : df_out = df_out[df_out[lag_col].notnull().min(axis = 1) != 0]
     return df_out
+
+class lazy_Tree :
+    """Explan Decision Tree Logic, Need More Optimize"""
+    def __init__(self, model, feature_list, max_depth = 1000, spacing = 1, decimals = 4) :
+        list_logic = export_text(model, feature_names=feature_list, max_depth = max_depth, spacing=spacing,decimals=decimals)
+        list_logic = list_logic.split('\n')
+        df_logic = pd.DataFrame({'logic' : list_logic})
+        df_logic['depth'] = df_logic['logic'].apply(lambda x : len([c for c in x if c in '|']))
+        df_logic = df_logic[df_logic['depth'] > 0]
+        df_logic['begin'] = (df_logic['depth'] <= df_logic['depth'].shift(1)) | (df_logic['depth'] == 1)
+        df_logic['end'] = (df_logic['depth'] >= df_logic['depth'].shift(-1)) | (df_logic['depth'] == max(df_logic['depth']))
+        df_logic['end'].iloc[-1] = True
+        df_logic['group'] = df_logic['begin'].cumsum()
+        df_logic['logic'] = df_logic['logic'].apply(lambda x : str(x).split('|-')[-1][1:])
+        df_logic['logic'] = np.where(df_logic['end'], df_logic['logic'], df_logic['logic'].str.split(' '))
+        df_logic['feature'] = np.where(df_logic['end'], np.NaN, df_logic['logic'].apply(lambda x : x[0]))
+        df_logic['operator'] = np.where(df_logic['end'], np.NaN, df_logic['logic'].apply(lambda x : x[1]))
+        df_logic['value'] = np.where(df_logic['end'], np.NaN, df_logic['logic'].apply(lambda x : x[-1]))
+        df_logic['output'] = np.where(df_logic['end'], df_logic['logic'], np.NaN)
+
+        all_logic = pd.DataFrame()
+        for i in df_logic['group'].unique() :
+            buffer = all_logic.append(df_logic[df_logic['group'] == i])
+            buffer = buffer[buffer['depth'] <= buffer[buffer['group'] == i]['depth'].max()]
+            grouplist = list(buffer['group'].unique())
+            grouplist.reverse()
+            for j in grouplist :
+                if j in list(buffer['group']) :
+                    buffer = buffer[(~buffer['depth'].isin(buffer[buffer['group'] == j]['depth']))|(buffer['group'] >= j)]
+            buffer['group'] = int(i)
+            all_logic = all_logic.append(buffer)
+        self.feature_list = feature_list[:]
+        self.logic_frame = all_logic.reset_index(drop = True)
+
+
+    def mapping(self, x, logic = self.logic_frame, asframe = False):
+        operator_dict = {'>' : lambda x,y : x > y,'>=' : lambda x,y : x >= y
+                        ,'<' : lambda x,y : x < y,'<=' : lambda x,y : x <= y
+                        ,'==' : lambda x,y : x == y}
+        cal = logic.merge(pd.DataFrame({'actual' : x}).reset_index()
+                          , how = 'inner' , left_on = 'feature' , right_on = 'index')
+        cal['check'] = cal.apply(lambda x : operator_dict[x['operator']](float(x['actual']),float(x['value'])), axis = 1)
+        cal = cal.groupby(['group']).agg({"check": 'sum',"feature": 'count'})
+        cal = cal[cal['check'] == cal['feature']]
+        if len(cal) != 1 :
+            raise Exception("Error Found matching {} Cases.\nSuggest to try increase max_depth or decimals".format(len(cal)))
+        elif asframe :
+            return logic[logic['group'] == cal.index[0]]
+        else :
+            return str(list(logic[logic['group'] == cal.index[0]]['logic']))
