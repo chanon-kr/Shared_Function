@@ -85,7 +85,7 @@ class lazy_treereason :
         self.feature_list = feature_list[:]
         self.logic_frame = all_logic.reset_index(drop = True)
     
-    def explan(self, x, logic = None, asframe = False):
+    def explain(self, x, logic = None, asframe = False , asstring = False):
         if logic == None : logic = self.logic_frame
         operator_dict = {'>' : lambda x,y : x > y,'>=' : lambda x,y : x >= y
                         ,'<' : lambda x,y : x < y,'<=' : lambda x,y : x <= y
@@ -99,5 +99,7 @@ class lazy_treereason :
             raise Exception("Error Found matching {} Cases.\nSuggest to try increase max_depth or decimals".format(len(cal)))
         elif asframe :
             return logic[logic['group'] == cal.index[0]]
-        else :
+        elif asstring :
             return str(list(logic[logic['group'] == cal.index[0]]['logic']))
+        else :
+            return list(logic[logic['group'] == cal.index[0]]['logic'])
