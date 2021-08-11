@@ -52,7 +52,7 @@ def create_lag(df_in , col_in , lag_range , lag_name = 'lag' , drop_null = True,
     if drop_null : df_out = df_out[df_out[lag_col].notnull().min(axis = 1) != 0]
     return df_out
 
-class lazy_treereason :
+class lazy_tree_logic :
     """Explan Decision Tree Logic, Need More Optimize and Naming"""
     def __init__(self, model, feature_list, max_depth = 1000, spacing = 1, decimals = 4) :
         list_logic = export_text(model, feature_names=feature_list, max_depth = max_depth, spacing=spacing,decimals=decimals)
