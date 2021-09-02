@@ -257,7 +257,7 @@ class da_tran_SQL :
         else :
             print('Do not have table to delete at',pd.Timestamp.now())
 
-    def dump_replace(self, df_in, table_name_in, list_key, math_logic = '', partition_delete = 100000, debug = False):
+    def dump_replace(self, df_in, table_name_in, list_key, math_logic = '', partition_delete = 50000, debug = False):
         """Delete exists row of table in database with same key(s) as df and dump df append to table"""
         if len(df_in) == 0 : 
             print('No Data to dump into',table_name_in,' End ',pd.Timestamp.now())
