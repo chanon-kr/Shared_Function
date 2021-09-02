@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 import os
 
 class da_tran_SQL :
-    """interact with SQL : Update 2021-07-22
+    """interact with SQL : Update 2021-09-02
 
     :sql_type = string - type of database, support MSSQL, MYSQL, POSTGRESQL, SQLITE, BIGQUERY
 
@@ -27,7 +27,7 @@ class da_tran_SQL :
     """
     def __init__(self, sql_type, host_name, database_name, user = '', password = '' , credentials_path = None
                 , chunksize = 150, partition_size = 5000, parallel_dump = False, max_parallel = 2, **kwargs):
-        """Create connection to SQL Server"""
+        """Create connection to SQL"""
         sql_type = sql_type.upper()
         self.sql_type = sql_type
         self.chunksize = int(chunksize)
@@ -91,7 +91,7 @@ class da_tran_SQL :
     def sub_dump(self, df_in,table_name_in,mode_in) :
         """normal to_sql for dask's delayed in dump_main"""
         if (self.credentials != '') & (self.sql_type == 'BIGQUERY') :
-            # print('{}{}'.format(self.dataset , table_name_in))
+            # print('{}{}'.format(self.dataset , table_name_in)) # For Debug
             df_in.to_gbq('{}{}'.format(self.dataset , table_name_in),project_id = self.project_id
                                         ,credentials = self.credentials , reauth = True, if_exists = mode_in)
         else :
@@ -99,7 +99,7 @@ class da_tran_SQL :
         return len(df_in)
 
     def dump_main(self, df_in, table_name_in ,mode_in) :
-        """Divide and Dump Dataframe"""
+        """Divide and Dump Dataframe Into Database"""
         if len(df_in) <= self.partition_size : sum_len = self.sub_dump(df_in,table_name_in,mode_in) 
         else :
             if self.parallel_dump : 
@@ -162,7 +162,7 @@ class da_tran_SQL :
 
     def write_logic_sql(self, key , value_in):
         """Write SQL Condition Query that include >, <, ="""
-        #logic_query = self.begin_name+ str(key) + self.end_name + ' ' + value_in['logic'] + ' '
+        #logic_query = self.begin_name+ str(key) + self.end_name + ' ' + value_in['logic'] + ' ' # For Debug
         value_in['type'] = value_in.get('type','')
         if value_in.get('value','there is no value') != 'there is no value' :
             if ('date' in value_in['type']) | ('time' in value_in['type']):  # Datetime will need '' in SQL Statement
@@ -170,7 +170,6 @@ class da_tran_SQL :
                 logic_query += """'""" + str(value_in['value']) + """'"""
             else : 
                 logic_query = self.begin_name+ str(key) + self.end_name + ' ' + value_in['logic'] + ' ' + str(value_in['value'])
-#                logic_query += 
         else : raise Exception("Please insert value data")  # will get error if not specific value
         return logic_query
 
@@ -213,13 +212,12 @@ class da_tran_SQL :
         else : logic_query = '' # Return Nothing
         #print(logic_query)
         if "'Will BE rEpLaCe wItH NULL'" in logic_query :
-            #print(logic_query)
+            #print(logic_query) # For Debug
             logic_query = logic_query.replace(", 'Will BE rEpLaCe wItH NULL'",'')
-            #print(logic_query)
+            #print(logic_query) # For Debug
             logic_query = logic_query.replace("'Will BE rEpLaCe wItH NULL',",'')
             logic_query = logic_query.replace("'Will BE rEpLaCe wItH NULL'",'')
             logic_query = '(' + logic_query + ' OR {}{}{} IS NULL'.format(self.begin_name , key, self.end_name) + ')'
-
         return logic_query
 
     def delete_old_data(self, df_in, table_name_in, list_key, math_logic, debug) :
@@ -328,41 +326,4 @@ class da_tran_SQL :
         #Dump df_in append to database
         print('Dump data to ',table_name_in,' Begin ',pd.Timestamp.now())
         self.dump_main( df_out, table_name_in ,mode_in = 'append') 
-        print('Dump data to ',table_name_in,' End ', pd.Timestamp.now())
-
-    def dump_new_old(self, df_in, table_name_in, list_key) :
-        """Delete exists row of df that has same key(s) as table and dump df_in append to table"""
-        print('Start Filter Existing data from df at ',pd.Timestamp.now())
-
-        #for single key
-        if 'str' in str(type(list_key))  :
-            if not list_key in df_in.columns :
-                raise Exception("{} is not in df's columns".format(list_key))       
-            sql_q = 'select distinct '+ self.begin_name +  list_key + self.end_name +' from ' + table_name_in
-            filter_filter = pd.read_sql_query(sql_q, con = self.engine).iloc[:,0]
-            logic_filter = ~df_in[list_key].isin(filter_filter)
-
-        #for multi keys    
-        elif 'list' in str(type(list_key)) :
-            if not min(x in df_in.columns for x in list_key) :
-                raise Exception("Some keys are not in df's columns")
-            i = 0
-            while i < len(list_key) :
-                filter_name = list_key[i]
-                sql_q = 'select distinct '+ self.begin_name +  filter_name + self.end_name +' from ' + table_name_in
-                filter_filter = pd.read_sql_query(sql_q, con = self.engine).iloc[:,0]
-                if i == 0 : logic_filter = df_in[filter_name].isin(filter_filter)
-                else : logic_filter = (logic_filter) & (df_in[filter_name].isin(filter_filter))
-                i += 1
-
-            logic_filter = ~logic_filter
-
-        #if key is not either string or list
-        else :
-            raise Exception("List of Key must be string or list")
-
-        df_in = df_in[logic_filter]
-
-        #Dump df_in append to database
-        self.dump_main(df_in, table_name_in ,mode_in = 'append')
         print('Dump data to ',table_name_in,' End ', pd.Timestamp.now())
