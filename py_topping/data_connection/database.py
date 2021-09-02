@@ -69,14 +69,15 @@ class da_tran_SQL :
                                                             ,database_name , additional_param)
         
         if (credentials_path != '') & (sql_type == 'BIGQUERY') :
-            # self.engine = create_engine(connection_str, credentials_path = credentials_path)
             from google.oauth2 import service_account
             self.project_id = host_name
             # self.dataset = self.begin_name + database_name + self.end_name + '.'
             self.dataset = database_name + '.'
-            self.engine = create_engine(connection_str)
-            if credentials_path == None : self.credentials, self.credentials_path = None, None
+            if credentials_path == None : 
+                self.credentials, self.credentials_path = None, None
+                self.engine = create_engine(connection_str)
             else : 
+                self.engine = create_engine(connection_str, credentials_path = credentials_path)
                 self.credentials = service_account.Credentials.from_service_account_file(credentials_path)
                 self.credentials_path = credentials_path
             print(pd.read_gbq("""SELECT 'Connection OK'""",project_id = self.project_id,credentials = self.credentials).iloc[0,0]) 
