@@ -93,7 +93,7 @@ class da_tran_SQL :
         if (self.credentials != '') & (self.sql_type == 'BIGQUERY') :
             # print('{}{}'.format(self.dataset , table_name_in)) # For Debug
             df_in.to_gbq('{}{}'.format(self.dataset , table_name_in),project_id = self.project_id
-                                        ,credentials = self.credentials , reauth = True, if_exists = mode_in)
+                                        ,credentials = self.credentials , if_exists = mode_in) #, reauth = True
         else :
             df_in.to_sql(table_name_in, con = self.engine, index = False,if_exists = mode_in,chunksize = self.chunksize, method = self.method)
         return len(df_in)
