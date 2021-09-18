@@ -33,7 +33,7 @@ class da_tran_bucket:
             filename = blob.name.split('/')[-1]
             blob.download_to_filename(local_folder + '/'+ filename)  # Download
 
-    def upload(self, bucket_file, local_file):
+    def upload(self, bucket_file, local_file , remove_file = False):
         if self.credentials == '' : pass
         else : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials
 
@@ -45,8 +45,9 @@ class da_tran_bucket:
         blob = bucket.blob(bucket_file)
         # Download the file to a destination
         blob.upload_from_filename(local_file)
+        if remove_file : os.remove(local_file)
 
-    def upload_folder(self, bucket_folder, local_folder):
+    def upload_folder(self, bucket_folder, local_folder , remove_file = False):
         if self.credentials == '' : pass
         else : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials
 
@@ -62,3 +63,4 @@ class da_tran_bucket:
             blob = bucket.blob(bucket_file)
             # Download the file to a destination
             blob.upload_from_filename(i)
+            if remove_file : os.remove(i)
