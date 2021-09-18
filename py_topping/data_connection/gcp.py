@@ -1,6 +1,6 @@
 import os
 from google.cloud import storage
-
+from glob import glob
 
 class da_tran_bucket:
     def __init__(self, project_id, bucket_name,credential = '') :
@@ -45,3 +45,20 @@ class da_tran_bucket:
         blob = bucket.blob(bucket_file)
         # Download the file to a destination
         blob.upload_from_filename(local_file)
+
+    def upload_folder(self, bucket_folder, local_folder):
+        if self.credentials == '' : pass
+        else : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials
+
+        # Initialise a client
+        client = storage.Client(self.project_id)
+        # Create a bucket object for our bucket
+        bucket = client.get_bucket(self.bucket_name)
+        # Upload File from List
+        for i in glob(local_folder + '/*') :
+            # Create File Name
+            bucket_file = i.replace(local_folder,bucket_folder).replace('\\','/')
+            # Create a blob object from the filepath
+            blob = bucket.blob(bucket_file)
+            # Download the file to a destination
+            blob.upload_from_filename(i)
