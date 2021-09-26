@@ -81,6 +81,7 @@ You could see samples of how to use this library inside the samples folder in gi
   - To check port status
   - To send LINE message, sticker or picture with line notify
   - To Create diff hour of (Desired UTC) - (Environment UTC)
+  - To Check health of your machine
   - Sample of use 
     - LINE => https://github.com/chanon-kr/Shared_Function/blob/main/samples/lazy_LINE.ipynb
     - EMAIL => https://github.com/chanon-kr/Shared_Function/blob/main/samples/email_sender.ipynb
