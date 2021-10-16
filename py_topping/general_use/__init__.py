@@ -7,7 +7,7 @@ from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 import mimetypes
 from datetime import datetime
-import os , csv , re, socket, requests, shutil, psutil
+import os , csv , re, socket, requests
 
 class email_sender :
     def __init__(self, user, password, servername):
@@ -136,6 +136,7 @@ def check_utc(utc_target) :
     return int(round(utc_target - current_utc,0))
 
 def healthcheck(cpu_interval = 1):
+    import shutil, psutil
     pc_name = str(socket.gethostname())
     pc_ip = str(socket.gethostbyname(socket.gethostname()))
     du = shutil.disk_usage("/")
