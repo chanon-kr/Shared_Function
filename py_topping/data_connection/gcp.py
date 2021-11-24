@@ -33,7 +33,7 @@ class da_tran_bucket:
             if blob.name.endswith("/"):
                 continue
             filename = blob.name.split('/')[-1]
-            blob.download_to_filename(local_folder + '/'+ filename)  # Download
+            blob.download_to_filename(os.path.join(local_folder,filename))  # Download
 
     def upload(self, bucket_file, local_file , remove_file = False):
         if self.credentials == '' : pass
