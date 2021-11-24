@@ -30,6 +30,8 @@ class da_tran_bucket:
         bucket = client.get_bucket(self.bucket_name)
         blobs = bucket.list_blobs(prefix=bucket_folder)  # Get list of files
         for blob in blobs:
+            if blob.name.endswith("/"):
+                continue
             filename = blob.name.split('/')[-1]
             blob.download_to_filename(local_folder + '/'+ filename)  # Download
 
