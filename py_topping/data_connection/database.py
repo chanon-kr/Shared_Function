@@ -32,7 +32,7 @@ class da_tran_SQL :
         sql_type = sql_type.upper()
         self.sql_type = sql_type
         self.chunksize = int(chunksize)
-        self.password = quote_plus(str(self.password))
+        password = quote_plus(str(password))
         if sql_type == 'BIGQUERY' : self.method = None
         else : self.method = 'multi'
         self.partition_size = int(partition_size)
