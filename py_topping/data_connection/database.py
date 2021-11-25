@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 import os
 
 class da_tran_SQL :
-    """interact with SQL : Update 2021-09-02
+    """interact with SQL : Update 2021-11-25
 
     :sql_type = string - type of database, support MSSQL, MYSQL, POSTGRESQL, SQLITE, BIGQUERY
 
