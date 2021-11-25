@@ -21,10 +21,13 @@ class da_tran_bucket:
         # Download the file to a destination
         blob.download_to_filename(local_file)
 
-    def download_folder(self, bucket_folder, local_folder):
+    def download_folder(self, bucket_folder, local_folder, create_folder = False):
         if self.credentials == '' : pass
         else : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials
-
+        if not os.path.isdir(local_folder) :
+            if create_folder :
+                os.mkdir(local_folder)
+            else : print('Local Folder Not Found, Create Folder Manual or add create_folder = True')
         # Initialise a client
         client = storage.Client(self.project_id)
         bucket = client.get_bucket(self.bucket_name)
