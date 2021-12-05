@@ -1,7 +1,6 @@
 
 from datetime import datetime
 import os, re, traceback, sys
-import papermill as pm
 import pandas as pd
 from py_topping.general_use import email_sender
 
@@ -20,6 +19,7 @@ def run_script(script_list , out_folder = '', out_prefix = None): #, email_sende
     log_out.append(i)
     try :
         if i.split('.')[-1] == 'ipynb' : 
+            import papermill as pm
             if out_prefix == None : prefix = datetime.now().strftime('%Y_%m_%d_%H_%M_')
             else : prefix = out_prefix
             out_name = str(out_folder) + '/' + prefix + i.split('\\')[-1].split('/')[-1]
