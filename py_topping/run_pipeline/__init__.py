@@ -50,7 +50,8 @@ def run_script(script_list , out_folder = '', out_prefix = None): #, email_sende
   return pd.DataFrame(logs_out, columns = ['start','script','notebook_out','run_result','end'])
 
 def run_pipeline(script_list = [], out_folder = '', out_prefix = None, email_dict = None , sending = False
-                    , only_error = False, notebook_attached = False, attached_only_error = False, attached_log = False, log_sql = None) :
+                    , only_error = False, notebook_attached = False, attached_only_error = False, attached_log = False, log_sql = None
+                    , line_sending = None, line_subject = 'Untitled') :
 
     if sending :
         if (['user' , 'password', 'server' ,'sendto','subject'].sort() != list(email_dict.keys()).sort()) or (email_dict == None) :
@@ -69,7 +70,9 @@ def run_pipeline(script_list = [], out_folder = '', out_prefix = None, email_dic
         run_log = run_log.drop(['job_name'], axis = 1)
 
     if sending & only_error  : 
-        if (run_log['run_result'] != 'OK').sum() == 0 : sending = False
+        if (run_log['run_result'] != 'OK').sum() == 0 : 
+            sending = False
+            line_sending = None
         else : run_log = run_log[(run_log['run_result'] != 'OK')]
 
     if sending & notebook_attached : 
@@ -95,5 +98,11 @@ def run_pipeline(script_list = [], out_folder = '', out_prefix = None, email_dic
         em.send(email_dict['sendto'] , email_subject , run_output , attachment= attached)
 
     if sending & attached_log : os.remove(file_name)
+
+    if line_sending != None :
+        for i in out_log.index :
+            line_out_log = out_log.drop('notebook_out', axis = 1).T[i].to_string(index = False)
+            line_out_log = '\n-----\n{}\n-----\n{}'.format(line_subject,line_out_log)
+            line_sending.send(line_out_log , notification = True)
 
     return out_log  
