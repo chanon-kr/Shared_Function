@@ -2,7 +2,7 @@ import os
 from google.cloud import storage
 from glob import glob
 
-class lazy_gcs :
+class lazy_GCS :
     def __init__(self, project_id, bucket_name,credential = '') :
         self.project_id = project_id
         self.bucket_name = bucket_name
