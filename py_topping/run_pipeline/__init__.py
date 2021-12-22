@@ -69,7 +69,7 @@ def run_pipeline(script_list = [], out_folder = '', out_prefix = None, email_dic
         run_log.astype('str').to_sql(log_sql['table_name'], con = log_sql['da_tran_SQL'].engine , if_exists = 'append', index = False)
         run_log = run_log.drop(['job_name'], axis = 1)
 
-    if sending & only_error  : 
+    if ((line_sending != None) | sending) & only_error  : 
         if (run_log['run_result'] != 'OK').sum() == 0 : 
             sending = False
             line_sending = None
@@ -100,9 +100,11 @@ def run_pipeline(script_list = [], out_folder = '', out_prefix = None, email_dic
     if sending & attached_log : os.remove(file_name)
 
     if line_sending != None :
-        for i in out_log.index :
-            line_out_log = out_log.drop('notebook_out', axis = 1).T[i].to_string()
+        for i in run_log.index :
+            line_out_log = run_log.drop('notebook_out', axis = 1).T[i].to_string()
             line_out_log = '\n-----\n{}\n-----\n{}'.format(line_subject,line_out_log)
             line_sending.send(line_out_log , notification = True)
+            if run_log.loc[i,'run_result'] != 'OK' : 
+                line_sending.send(str(run_log.loc[i,'run_result']) , notification = True)
 
     return out_log  
