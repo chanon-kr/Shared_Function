@@ -18,14 +18,14 @@ def run_script(script_list , out_folder = '', out_prefix = None): #, email_sende
     log_out.append(str(datetime.now()).split('.')[0])
     log_out.append(i)
     try :
-        if i.split('.')[-1] == 'ipynb' : 
+        if i.endswith('.ipynb') : 
             import papermill as pm
             if out_prefix == None : prefix = datetime.now().strftime('%Y_%m_%d_%H_%M_')
             else : prefix = out_prefix
             out_name = str(out_folder) + '/' + prefix + i.split('\\')[-1].split('/')[-1]
             log_out.append(out_name)
             pm.execute_notebook(i,out_name)
-        elif i.split('.')[-1] == 'py' :
+        elif i.endswith('.py') :
             log_out.append(None)
             if len(re.findall(re_pattern, i )) > 0 :
                 print("Script File {} has {} in the name, Will EXECUTE with UNSAFE method".format(i,re_pattern))
