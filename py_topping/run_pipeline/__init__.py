@@ -32,7 +32,7 @@ def run_script(script_list , out_folder = '', out_prefix = None): #, email_sende
                 with open(i, encoding="utf8",newline='') as f :
                     exec(f.read())
             else : 
-                i_ = i.replace('.py','')
+                i_ = i[:-3]
                 if i_[0] == '/' : i_ = i_[1:]
                 for j in ['/','\\'] : i_ = i_.replace(j , '.')
                 exec('import {}'.format(i_))
@@ -101,7 +101,7 @@ def run_pipeline(script_list = [], out_folder = '', out_prefix = None, email_dic
 
     if line_sending != None :
         for i in out_log.index :
-            line_out_log = out_log.drop('notebook_out', axis = 1).T[i].to_string(index = False)
+            line_out_log = out_log.drop('notebook_out', axis = 1).T[i].to_string()
             line_out_log = '\n-----\n{}\n-----\n{}'.format(line_subject,line_out_log)
             line_sending.send(line_out_log , notification = True)
 
