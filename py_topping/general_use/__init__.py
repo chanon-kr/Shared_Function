@@ -88,9 +88,7 @@ class lazy_LINE :
 
     def send(self, message , stickerPackageId = '', stickerId = '', notification = True, picture = '' , timeout = None) :
         if timeout == None : timeout = self.timeout
-        payload = {}
-        payload['message'] = message
-        payload['notificationDisabled'] = not notification
+        payload = {'message' : message , 'notificationDisabled' : not notification}
 
         if (stickerPackageId != '') & (stickerId != '') :
             payload['stickerPackageId'] = stickerPackageId
