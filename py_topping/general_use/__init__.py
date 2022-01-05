@@ -76,16 +76,18 @@ class email_sender :
         return self.executor(recipients, message)
 
 class lazy_LINE :
-    def __init__(self, token) :
+    def __init__(self, token, timeout = 60) :
         self.token = token
+        self.timeout = timeout
     
     def help(self) :
         helper = 'Main Page : https://notify-bot.line.me/en\n'
         helper += 'Doc : https://notify-bot.line.me/doc/en\n'
         helper += 'Sticker List : https://developers.line.biz/en/docs/messaging-api/sticker-list'
         print(helper)
-    
-    def send(self, message , stickerPackageId = '', stickerId = '', notification = True, picture = '') :
+
+    def send(self, message , stickerPackageId = '', stickerId = '', notification = True, picture = '' , timeout = None) :
+        if timeout == None : timeout = self.timeout
         payload = {}
         payload['message'] = message
         payload['notificationDisabled'] = not notification
@@ -97,11 +99,12 @@ class lazy_LINE :
         if picture == '' : 
             r = requests.post('https://notify-api.line.me/api/notify'
                                 , headers={'Authorization' : 'Bearer {}'.format(self.token)}
-                                , params = payload)
+                                , params = payload, timeout = timeout)
         else :
             r = requests.post('https://notify-api.line.me/api/notify'
                                 , headers={'Authorization' : 'Bearer {}'.format(self.token)}
-                                , params = payload , files = {'imageFile': open(picture, 'rb')})
+                                , params = payload , timeout = timeout
+                                , files = {'imageFile': open(picture, 'rb')})
         return r
 
 def log_csv(file_name,msg_in):
