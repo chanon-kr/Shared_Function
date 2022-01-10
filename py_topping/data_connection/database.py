@@ -28,11 +28,12 @@ class lazy_SQL :
     more sample of this class at https://github.com/chanon-kr/Shared_Function/blob/main/samples/database.ipynb
     """
     def __init__(self, sql_type, host_name, database_name, user = '', password = '' , credentials_path = None
-                , chunksize = 150, partition_size = 5000, parallel_dump = False, max_parallel = 2, **kwargs):
+                , chunksize = 150, partition_size = 5000, parallel_dump = False, max_parallel = 2, mute = False, **kwargs):
         """Create connection to SQL"""
         sql_type = sql_type.upper()
         self.sql_type = sql_type
         self.chunksize = int(chunksize)
+        self.mute = mute
         password = quote_plus(str(password))
         if sql_type == 'BIGQUERY' : self.method = None
         else : self.method = 'multi'
@@ -83,13 +84,13 @@ class lazy_SQL :
                 self.engine = create_engine(connection_str, credentials_path = credentials_path)
                 self.credentials = service_account.Credentials.from_service_account_file(credentials_path)
                 self.credentials_path = credentials_path
-            print(pd.read_gbq("""SELECT 'Connection OK'""",project_id = self.project_id,credentials = self.credentials).iloc[0,0]) 
+            if not self.mute : print(pd.read_gbq("""SELECT 'Connection OK'""",project_id = self.project_id,credentials = self.credentials).iloc[0,0]) 
         else :
             self.credentials = ''
             self.credentials_path  = None
             self.dataset = ''
             self.engine = create_engine(connection_str)
-            print(pd.read_sql_query("""SELECT 'Connection OK'""", con = self.engine).iloc[0,0]) 
+            if not self.mute : print(pd.read_sql_query("""SELECT 'Connection OK'""", con = self.engine).iloc[0,0]) 
 
     def sub_dump(self, df_in,table_name_in,mode_in) :
         """normal to_sql for dask's delayed in dump_main"""
@@ -180,19 +181,19 @@ class lazy_SQL :
         """Delete exists table and replace with new df"""
         if table_name_in in list(self.engine.table_names()) :
             if fix_table : 
-                print('Delete Existing data from Table at ',pd.Timestamp.now())
+                if not self.mute : print('Delete Existing data from Table at ',pd.Timestamp.now())
                 if self.credentials_path != None : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials_path
                 self.engine.execute("""DELETE FROM {}{}{}""".format(self.begin_name,table_name_in,self.end_name))
             else :
-                print('Drop Existing Table at ',pd.Timestamp.now())
+                if not self.mute : print('Drop Existing Table at ',pd.Timestamp.now())
                 if self.credentials_path != None : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials_path
                 self.engine.execute("""DROP TABLE {}{}{}""".format(self.begin_name,table_name_in,self.end_name))
         else :
-            print('Do not have table to delete at',pd.Timestamp.now())
+            if not self.mute : print('Do not have table to delete at',pd.Timestamp.now())
         #Dump df_in to database
-        print('Dump data to ',table_name_in,' Begin ',pd.Timestamp.now())
+        if not self.mute : print('Dump data to ',table_name_in,' Begin ',pd.Timestamp.now())
         self.dump_main( df_in, table_name_in ,mode_in = 'append') 
-        print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
+        if not self.mute : print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
 
     def write_in_sql(self,df_in , key) :
         """Write SQL Condition Query 'in (x,x,x)'"""
@@ -252,18 +253,18 @@ class lazy_SQL :
         
         #Delete exiting row from table
         if table_name_in in list(self.engine.table_names()) :
-            print('Start delete old data at',pd.Timestamp.now())
+            if not self.mute : print('Start delete old data at',pd.Timestamp.now())
             if debug : print(sql_q)
             if self.credentials_path != None : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials_path
             self.engine.execute(sql_q)
-            print('Delete Last '+str(list_key)+' at',pd.Timestamp.now())
+            if not self.mute : print('Delete Last '+str(list_key)+' at',pd.Timestamp.now())
         else :
-            print('Do not have table to delete at',pd.Timestamp.now())
+            if not self.mute : print('Do not have table to delete at',pd.Timestamp.now())
 
     def dump_replace(self, df_in, table_name_in, list_key, math_logic = '', partition_delete = 50000, debug = False):
         """Delete exists row of table in database with same key(s) as df and dump df append to table"""
         if len(df_in) == 0 : 
-            print('No Data to dump into',table_name_in,' End ',pd.Timestamp.now())
+            if not self.mute : print('No Data to dump into',table_name_in,' End ',pd.Timestamp.now())
         else :
             if len(df_in) <= partition_delete : 
                 self.delete_old_data(df_in, table_name_in, list_key, math_logic, debug)
@@ -271,19 +272,19 @@ class lazy_SQL :
                 i, df_length = 0, len(df_in)
                 while i < df_length :
                     i_next = i + partition_delete
-                    print("Processing {}-{} row from {} rows".format(i + 1, i_next, df_length))
+                    if not self.mute : print("Processing {}-{} row from {} rows".format(i + 1, i_next, df_length))
                     self.delete_old_data(df_in.iloc[i:i_next,:],table_name_in, list_key, math_logic, debug)
                     i += partition_delete
             #Dump df_in append to database
             self.dump_main(df_in, table_name_in ,mode_in = 'append')
-            print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
+            if not self.mute : print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
 
     def dump_new(self, df_in, table_name_in, list_key , debug = False) :
         """Delete exists row of df that has same key(s) as table and dump df_in append to table"""
 
         # Check if Table existing or not
         if table_name_in in list(self.engine.table_names()) :
-            print('Start Filter Existing data from df at ',pd.Timestamp.now())
+            if not self.mute : print('Start Filter Existing data from df at ',pd.Timestamp.now())
             
             df_out = df_in.copy()
             #for single key
@@ -324,12 +325,13 @@ class lazy_SQL :
 
             df_out = df_out[logic_filter]
             
-        else : print('Table not existing at ',pd.Timestamp.now())
+        else : 
+            if not self.mute : print('Table not existing at ',pd.Timestamp.now())
 
         #Dump df_in append to database
-        print('Dump data to ',table_name_in,' Begin ',pd.Timestamp.now())
+        if not self.mute : print('Dump data to ',table_name_in,' Begin ',pd.Timestamp.now())
         self.dump_main( df_out, table_name_in ,mode_in = 'append') 
-        print('Dump data to ',table_name_in,' End ', pd.Timestamp.now())
+        if not self.mute : print('Dump data to ',table_name_in,' End ', pd.Timestamp.now())
 
 class da_tran_SQL :
     """interact with SQL : Update 2021-11-25
