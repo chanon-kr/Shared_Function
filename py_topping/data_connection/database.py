@@ -5,7 +5,7 @@ from urllib.parse import quote_plus
 
 
 class lazy_SQL :
-    """interact with SQL : Update 2021-11-25
+    """interact with SQL : Update 2022-01-10
 
     :sql_type = string - type of database, support MSSQL, MYSQL, POSTGRESQL, SQLITE, BIGQUERY
 
