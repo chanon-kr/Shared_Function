@@ -5,7 +5,7 @@ from urllib.parse import quote_plus
 
 
 class lazy_SQL :
-    """interact with SQL : Update 2022-01-10
+    """interact with SQL : Update 2022-04-17
 
     :sql_type = string - type of database, support MSSQL, MYSQL, POSTGRESQL, SQLITE, BIGQUERY
 
@@ -90,7 +90,9 @@ class lazy_SQL :
             self.credentials_path  = None
             self.dataset = ''
             self.engine = create_engine(connection_str)
-            if not self.mute : print(pd.read_sql_query("""SELECT 'Connection OK'""", con = self.engine).iloc[0,0]) 
+            if not self.mute : 
+                with self.engine.connect() as conn :
+                    print(pd.read_sql_query("""SELECT 'Connection OK'""", con = conn).iloc[0,0]) 
 
     def sub_dump(self, df_in,table_name_in,mode_in) :
         """normal to_sql for dask's delayed in dump_main"""
@@ -99,7 +101,8 @@ class lazy_SQL :
             df_in.to_gbq('{}{}'.format(self.dataset , table_name_in),project_id = self.project_id
                                         ,credentials = self.credentials , if_exists = mode_in) #, reauth = True
         else :
-            df_in.to_sql(table_name_in, con = self.engine, index = False,if_exists = mode_in,chunksize = self.chunksize, method = self.method)
+            with self.engine.connect() as conn :
+                df_in.to_sql(table_name_in, con = conn, index = False,if_exists = mode_in,chunksize = self.chunksize, method = self.method)
         return len(df_in)
 
     def dump_main(self, df_in, table_name_in ,mode_in) :
@@ -162,7 +165,9 @@ class lazy_SQL :
         if (self.credentials != '') & (self.sql_type == 'BIGQUERY') :
             return pd.read_gbq(sql_q,project_id = self.project_id,credentials = self.credentials)
         else :
-            return pd.read_sql_query(sql_q , con = self.engine)
+            with self.engine.connect() as conn :
+                out_ = pd.read_sql_query(sql_q , con = conn)
+            return out_
 
     def write_logic_sql(self, key , value_in):
         """Write SQL Condition Query that include >, <, ="""
@@ -183,11 +188,13 @@ class lazy_SQL :
             if fix_table : 
                 if not self.mute : print('Delete Existing data from Table at ',pd.Timestamp.now())
                 if self.credentials_path != None : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials_path
-                self.engine.execute("""DELETE FROM {}{}{}""".format(self.begin_name,table_name_in,self.end_name))
+                with self.engine.connect() as conn :
+                    conn.execute("""DELETE FROM {}{}{}""".format(self.begin_name,table_name_in,self.end_name))
             else :
                 if not self.mute : print('Drop Existing Table at ',pd.Timestamp.now())
                 if self.credentials_path != None : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials_path
-                self.engine.execute("""DROP TABLE {}{}{}""".format(self.begin_name,table_name_in,self.end_name))
+                with self.engine.connect() as conn :
+                    conn.execute("""DROP TABLE {}{}{}""".format(self.begin_name,table_name_in,self.end_name))
         else :
             if not self.mute : print('Do not have table to delete at',pd.Timestamp.now())
         #Dump df_in to database
@@ -256,7 +263,8 @@ class lazy_SQL :
             if not self.mute : print('Start delete old data at',pd.Timestamp.now())
             if debug : print(sql_q)
             if self.credentials_path != None : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials_path
-            self.engine.execute(sql_q)
+            with self.engine.connect() as conn :
+                    conn.execute(sql_q)
             if not self.mute : print('Delete Last '+str(list_key)+' at',pd.Timestamp.now())
         else :
             if not self.mute : print('Do not have table to delete at',pd.Timestamp.now())
@@ -307,7 +315,8 @@ class lazy_SQL :
                 if (self.credentials != '') & (self.sql_type == 'BIGQUERY') :
                     filter_filter = pd.read_gbq(sql_q,project_id = self.project_id,credentials = self.credentials)
                 else :
-                    filter_filter = pd.read_sql_query(sql_q, con = self.engine)
+                    with self.engine.connect() as conn :
+                        filter_filter = pd.read_sql_query(sql_q, con = conn)
                 # filter_filter = pd.read_sql_query(sql_q, con = self.engine)
                 filter_filter['key_sql_filter'] = ''
                 for i in filter_filter.columns :
