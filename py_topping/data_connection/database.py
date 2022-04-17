@@ -1,5 +1,5 @@
 import pandas as pd
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine , inspect
 import os
 from urllib.parse import quote_plus
 
@@ -184,7 +184,7 @@ class lazy_SQL :
 
     def dump_whole(self, df_in, table_name_in , fix_table = False, debug = False) :
         """Delete exists table and replace with new df"""
-        if table_name_in in list(self.engine.table_names()) :
+        if inspect(self.engine).has_table(table_name_in) :
             if fix_table : 
                 if not self.mute : print('Delete Existing data from Table at ',pd.Timestamp.now())
                 if self.credentials_path != None : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials_path
@@ -259,7 +259,7 @@ class lazy_SQL :
             raise Exception("List of Key must be string or list")
         
         #Delete exiting row from table
-        if table_name_in in list(self.engine.table_names()) :
+        if inspect(self.engine).has_table(table_name_in) :
             if not self.mute : print('Start delete old data at',pd.Timestamp.now())
             if debug : print(sql_q)
             if self.credentials_path != None : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials_path
@@ -291,7 +291,7 @@ class lazy_SQL :
         """Delete exists row of df that has same key(s) as table and dump df_in append to table"""
 
         # Check if Table existing or not
-        if table_name_in in list(self.engine.table_names()) :
+        if inspect(self.engine).has_table(table_name_in) :
             if not self.mute : print('Start Filter Existing data from df at ',pd.Timestamp.now())
             
             df_out = df_in.copy()
