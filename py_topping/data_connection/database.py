@@ -42,7 +42,7 @@ class lazy_SQL :
         if parallel_dump : print('Set to use parallel dump, there is a risk to use this method, use it with caution')
         self.max_parallel = int(max_parallel)
         type_dic = {
-                    'MSSQL' : ['mssql', 'pymssql', '1433','[',']','EXEC'],
+                    'MSSQL' : ['mssql', 'pytds', '1433','[',']','EXEC'],
                     'MYSQL' : ['mysql', 'pymysql','3306','`','`','CALL'],
                     'POSTGRESQL' : ['postgresql', 'psycopg2','5432','"','"','SELECT * FROM '],
                     'SQLITE' : ['sqlite', 'sqlite', '','[',']','EXEC'],
