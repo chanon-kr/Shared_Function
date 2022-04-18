@@ -127,7 +127,7 @@ class lazy_GCS :
             filename = blob.name.split('/')[-1]
             blob.download_to_filename(os.path.join(local_folder,filename))  # Download
 
-    def upload(self, bucket_file, local_file , remove_file = False):
+    def upload(self, bucket_file, local_file , remove_file = False, generate_signed_url = False, url_expiration = 60 ):
         if self.credentials == '' : pass
         else : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials
 
@@ -140,6 +140,15 @@ class lazy_GCS :
         # Download the file to a destination
         blob.upload_from_filename(local_file)
         if remove_file : os.remove(local_file)
+        if generate_signed_url :
+            return self.generate_signed_url(  service_account_file = self.credentials
+                                            , bucket_name = self.bucket_name
+                                            , object_name = bucket_file
+                                            , subresource=None
+                                            , expiration=url_expiration
+                                            , http_method='GET'
+                                            , query_parameters=None
+                                            , headers=None)
 
     def upload_folder(self, bucket_folder, local_folder , remove_file = False):
         if self.credentials == '' : pass
