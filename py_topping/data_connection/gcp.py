@@ -24,11 +24,10 @@ class lazy_GCS :
                         query_parameters=None, headers=None):
         """Reference from https://github.com/GoogleCloudPlatform/python-docs-samples/tree/e7379a8b33ab29b354292d370c3655f481bf3be5/storage/signed_urls"""
         if expiration > 604800:
-            print('Expiration Time can\'t be longer than 604800 seconds (7 days).')
-            sys.exit(1)
+            raise ValueError('Expiration Time can\'t be longer than 604800 seconds (7 days).')
         escaped_object_name = quote(six.ensure_binary(object_name), safe=b'/~')
         canonical_uri = f'/{escaped_object_name}'
-
+        
         datetime_now = datetime.datetime.now(tz=datetime.timezone.utc)
         request_timestamp = datetime_now.strftime('%Y%m%dT%H%M%SZ')
         datestamp = datetime_now.strftime('%Y%m%d')
@@ -79,8 +78,7 @@ class lazy_GCS :
                                        signed_headers,
                                        'UNSIGNED-PAYLOAD'])
 
-        canonical_request_hash = hashlib.sha256(
-            canonical_request.encode()).hexdigest()
+        canonical_request_hash = hashlib.sha256(canonical_request.encode()).hexdigest()
 
         string_to_sign = '\n'.join(['GOOG4-RSA-SHA256',
                                     request_timestamp,
@@ -150,7 +148,7 @@ class lazy_GCS :
                                             , query_parameters=None
                                             , headers=None)
 
-    def upload_folder(self, bucket_folder, local_folder , remove_file = False):
+    def upload_folder(self, bucket_folder, local_folder , remove_file = False, generate_signed_url = False, url_expiration = 60 ):
         if self.credentials == '' : pass
         else : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials
 
@@ -158,6 +156,8 @@ class lazy_GCS :
         client = storage.Client(self.project_id)
         # Create a bucket object for our bucket
         bucket = client.get_bucket(self.bucket_name)
+        # Create List of signed_url if used
+        if generate_signed_url : link_list = []
         # Upload File from List
         for i in glob(local_folder + '/*') :
             # Create File Name
@@ -167,6 +167,16 @@ class lazy_GCS :
             # Download the file to a destination
             blob.upload_from_filename(i)
             if remove_file : os.remove(i)
+            if generate_signed_url :
+                link_list.append(self.generate_signed_url(  service_account_file = self.credentials
+                                                , bucket_name = self.bucket_name
+                                                , object_name = bucket_file
+                                                , subresource=None
+                                                , expiration=url_expiration
+                                                , http_method='GET'
+                                                , query_parameters=None
+                                                , headers=None))
+        if generate_signed_url : return link_list
 
 class da_tran_bucket:
     def __init__(self, project_id, bucket_name,credential = '') :
