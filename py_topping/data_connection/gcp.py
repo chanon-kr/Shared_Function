@@ -96,6 +96,7 @@ class lazy_GCS :
         return signed_url
 
     def download(self, bucket_file, local_file):
+        """Need 2 permissions Storage Legacy Object Reader and Storage Legacy Bucket Writer"""
         if self.credentials == '' : pass
         else : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials
 
@@ -109,6 +110,7 @@ class lazy_GCS :
         blob.download_to_filename(local_file)
 
     def download_folder(self, bucket_folder, local_folder, create_folder = False):
+        """Need 2 permissions Storage Legacy Object Reader and Storage Legacy Bucket Writer"""
         if self.credentials == '' : pass
         else : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials
         if not os.path.isdir(local_folder) :
@@ -126,6 +128,7 @@ class lazy_GCS :
             blob.download_to_filename(os.path.join(local_folder,filename))  # Download
 
     def upload(self, bucket_file, local_file , remove_file = False, generate_signed_url = False, url_expiration = 60 ):
+        """Need a permission Storage Legacy Bucket Writer"""
         if self.credentials == '' : pass
         else : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials
 
@@ -149,6 +152,7 @@ class lazy_GCS :
                                             , headers=None)
 
     def upload_folder(self, bucket_folder, local_folder , remove_file = False, generate_signed_url = False, url_expiration = 60 ):
+        """Need a permission Storage Legacy Bucket Writer"""
         if self.credentials == '' : pass
         else : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials
 
