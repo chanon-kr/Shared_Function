@@ -7,7 +7,7 @@ from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 import mimetypes
 from datetime import datetime
-import os , csv , re, socket, requests
+import os , csv , re, socket, requests, string, random
 
 class email_sender :
     def __init__(self, user, password, servername):
@@ -194,3 +194,7 @@ def timeout(timeout):
             return ret
         return wrapper
     return deco
+
+def random_text(n) :
+    """Generate random text 'n' characters"""
+    return ''.join([random.choice(string.digits + string.ascii_letters) for x in range(n)])
