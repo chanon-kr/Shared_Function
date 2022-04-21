@@ -133,13 +133,13 @@ class lazy_GCS :
         blob = bucket.blob(bucket_file)
         blob.delete()
             
-    def delete_folder(self, bucket_folder , delete_folder = False):
+    def delete_folder(self, bucket_folder , delete_folder = False, deep_delete = False):
         if self.credentials == '' : pass
         else : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials
         # Get blobs
         blobs = self.list_folder(bucket_folder = bucket_folder 
-                                , as_blob = True, get_file = True, get_folder = False
-                                , all_file = False, include_self = delete_folder)
+                                , as_blob = True, get_file = True, get_folder = deep_delete
+                                , all_file = deep_delete, include_self = delete_folder)
         for blob in blobs : blob.delete()
 
 class da_tran_bucket:
