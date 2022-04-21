@@ -9,7 +9,8 @@ class lazy_GCS :
         self.bucket_name = bucket_name
         self.credentials = credential
 
-    def list_folder(self, bucket_folder ,as_blob = False):
+    def list_folder(self, bucket_folder ,as_blob = False, include_self= False
+                    , get_file = True, get_folder = False, all_file = False ) :
         if self.credentials == '' : pass
         else : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials
         # Initialise a client
@@ -18,8 +19,18 @@ class lazy_GCS :
         bucket = client.get_bucket(self.bucket_name)
         # list all objects in the directory
         blobs = bucket.list_blobs(prefix=bucket_folder)
-        if as_blob : return [blob for blob in blobs]
-        else : return [blob.name for blob in blobs]
+        files, folders = [], []
+        for blob in blobs :
+            if (blob.name.endswith("/")) : 
+                if (blob.name == f'{bucket_folder}/') : source = [blob]
+                else : folders.append(blob) # Folder
+            else : files.append(blob) # File
+        if not all_file :
+            for folder in folders : files = [file for file in files if not file.name.startswith(folder.name)]
+        out_put = [file for file in files if get_file] + [folder for folder in folders if get_folder]
+        if include_self : out_put += source
+        if as_blob : return [blob for blob in out_put]
+        else : return [blob.name for blob in out_put]
         
     def generate_signed_url(self, bucket_name, object_name, blob = None, expiration = 60):
         """
@@ -122,11 +133,13 @@ class lazy_GCS :
         blob = bucket.blob(bucket_file)
         blob.delete()
             
-    def delete_folder(self, bucket_folder):
+    def delete_folder(self, bucket_folder , delete_folder = False):
         if self.credentials == '' : pass
         else : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials
         # Get blobs
-        blobs = self.list_folder(bucket_folder = bucket_folder ,as_blob = True)
+        blobs = self.list_folder(bucket_folder = bucket_folder 
+                                , as_blob = True, get_file = True, get_folder = False
+                                , all_file = False, include_self = delete_folder)
         for blob in blobs : blob.delete()
 
 class da_tran_bucket:
