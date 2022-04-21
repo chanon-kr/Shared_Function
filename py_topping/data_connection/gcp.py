@@ -8,6 +8,18 @@ class lazy_GCS :
         self.project_id = project_id
         self.bucket_name = bucket_name
         self.credentials = credential
+
+    def list_folder(self, bucket_folder ,as_blob = False):
+        if self.credentials == '' : pass
+        else : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials
+        # Initialise a client
+        client = storage.Client(self.project_id)
+        # Create a bucket object for our bucket
+        bucket = client.get_bucket(self.bucket_name)
+        # list all objects in the directory
+        blobs = bucket.list_blobs(prefix=bucket_folder)
+        if as_blob : return [blob for blob in blobs]
+        else : return [blob.name for blob in blobs]
         
     def generate_signed_url(self, bucket_name, object_name, blob = None, expiration = 60):
         """
@@ -27,7 +39,6 @@ class lazy_GCS :
         """Need 2 permissions Storage Legacy Object Reader and Storage Legacy Bucket Writer"""
         if self.credentials == '' : pass
         else : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials
-
         # Initialise a client
         client = storage.Client(self.project_id)
         # Create a bucket object for our bucket
@@ -102,6 +113,21 @@ class lazy_GCS :
                                             , blob = blob
                                             , expiration = url_expiration))
         if generate_signed_url : return link_list
+
+    def delete(self, bucket_file):
+        if self.credentials == '' : pass
+        else : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials
+        client = storage.Client(self.project_id)
+        bucket = client.get_bucket(self.bucket_name)
+        blob = bucket.blob(bucket_file)
+        blob.delete()
+            
+    def delete_folder(self, bucket_folder):
+        if self.credentials == '' : pass
+        else : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials
+        # Get blobs
+        blobs = self.list_folder(bucket_folder = bucket_folder ,as_blob = True)
+        for blob in blobs : blob.delete()
 
 class da_tran_bucket:
     def __init__(self, project_id, bucket_name,credential = '') :
