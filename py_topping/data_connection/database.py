@@ -146,8 +146,9 @@ class lazy_SQL :
     #             df_in.to_sql(table_name_in, con = conn, index = False,if_exists = mode_in,chunksize = self.chunksize, method = self.method)
     #     return len(df_in)
 
-    def dump_main(self, df_in, table_name_in ,mode_in, partition_size = '') :
+    def dump_main(self, df_in, table_name_in ,mode_in, partition_size = '', con = '') :
         """Divide and Dump Dataframe Into Database"""
+        con = self.engine if con == '' else con
         partition_size = self.partition_size if partition_size == '' else partition_size
         i, j, sum_len, df_length = 0, 1, 0, len(df_in)
         while i < df_length :
@@ -160,8 +161,8 @@ class lazy_SQL :
                 df_dump.to_gbq('{}{}'.format(self.dataset , table_name_in),project_id = self.project_id
                                             ,credentials = self.credentials , if_exists = mode_in) #, reauth = True
             else :
-                with self.engine.connect() as conn :
-                    df_dump.to_sql(table_name_in, con = conn, index = False,if_exists = mode_in,chunksize = self.chunksize, method = self.method)
+                # with self.engine.connect() as con :
+                df_dump.to_sql(table_name_in, con = con, index = False,if_exists = mode_in,chunksize = self.chunksize, method = self.method)
             j += 1
             i += partition_size
         return sum_len
@@ -181,23 +182,33 @@ class lazy_SQL :
 
     def dump_whole(self, df_in, table_name_in , fix_table = False, debug = False) :
         """Delete exists table and replace with new df"""
-        if inspect(self.engine).has_table(table_name_in) :
-            if fix_table : 
-                if not self.mute : print('Delete Existing data from Table at ',pd.Timestamp.now())
-                if self.credentials_path != None : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials_path
-                with self.engine.connect() as conn :
-                    conn.execute("""DELETE FROM {}{}{}""".format(self.begin_name,table_name_in,self.end_name))
-            else :
-                if not self.mute : print('Drop Existing Table at ',pd.Timestamp.now())
-                if self.credentials_path != None : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials_path
-                with self.engine.connect() as conn :
-                    conn.execute("""DROP TABLE {}{}{}""".format(self.begin_name,table_name_in,self.end_name))
-        else :
-            if not self.mute : print('Do not have table to delete at',pd.Timestamp.now())
-        #Dump df_in to database
-        if not self.mute : print('Dump data to ',table_name_in,' Begin ',pd.Timestamp.now())
-        self.dump_main( df_in, table_name_in ,mode_in = 'append') 
-        if not self.mute : print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
+        with self.engine.connect() as con : 
+            trans = con.begin()
+            try :
+                if inspect(self.engine).has_table(table_name_in) :
+                    if fix_table : 
+                        if not self.mute : print('Delete Existing data from Table at ',pd.Timestamp.now())
+                        if self.credentials_path != None : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials_path
+                        # with self.engine.connect() as con :
+                        con.execute("""DELETE FROM {}{}{}""".format(self.begin_name,table_name_in,self.end_name))
+                    else :
+                        if not self.mute : print('Drop Existing Table at ',pd.Timestamp.now())
+                        if self.credentials_path != None : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials_path
+                        # with self.engine.connect() as con :
+                        con.execute("""DROP TABLE {}{}{}""".format(self.begin_name,table_name_in,self.end_name))
+                else :
+                    if not self.mute : print('Do not have table to delete at',pd.Timestamp.now())
+                #Dump df_in to database
+                if not self.mute : print('Dump data to ',table_name_in,' Begin ',pd.Timestamp.now())
+                self.dump_main( df_in, table_name_in ,mode_in = 'append', con = con) 
+                trans.commit()
+                if not self.mute : print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
+            except Exception as e :
+                print(e)
+                if not self.mute : print('Error During Dump to ',table_name_in,' Begin Rollback ',pd.Timestamp.now())
+                trans.rollback()
+                if not self.mute : print('Rollback ',table_name_in,' End ',pd.Timestamp.now())
+
 
     def write_in_sql(self,df_in , key) :
         """Write SQL Condition Query 'in (x,x,x)'"""
@@ -228,7 +239,7 @@ class lazy_SQL :
             logic_query = '(' + logic_query + ' OR {}{}{} IS NULL'.format(self.begin_name , key, self.end_name) + ')'
         return logic_query
 
-    def delete_old_data(self, df_in, table_name_in, list_key, math_logic, debug) :
+    def delete_old_data(self, df_in, table_name_in, list_key, math_logic, debug, con = '') :
         """Sub Function in dump_replace to delete row in target table"""
         #Create SQL Query for Delete
         sql_q = """DELETE FROM {}{}{} where """.format(self.begin_name,table_name_in,self.end_name)
@@ -260,84 +271,95 @@ class lazy_SQL :
             if not self.mute : print('Start delete old data at',pd.Timestamp.now())
             if debug : print(sql_q)
             if self.credentials_path != None : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials_path
-            with self.engine.connect() as conn :
-                    conn.execute(sql_q)
+            # with self.engine.connect() as con :
+            con.execute(sql_q)
             if not self.mute : print('Delete Last '+str(list_key)+' at',pd.Timestamp.now())
         else :
             if not self.mute : print('Do not have table to delete at',pd.Timestamp.now())
 
     def dump_replace(self, df_in, table_name_in, list_key, math_logic = '', partition_delete = 50000, debug = False):
         """Delete exists row of table in database with same key(s) as df and dump df append to table"""
-        if len(df_in) == 0 : 
-            if not self.mute : print('No Data to dump into',table_name_in,' End ',pd.Timestamp.now())
-        else :
-            if len(df_in) <= partition_delete : 
-                self.delete_old_data(df_in, table_name_in, list_key, math_logic, debug)
-            else :
-                i, df_length = 0, len(df_in)
-                while i < df_length :
-                    i_next = i + partition_delete
-                    if not self.mute : print("Processing {}-{} row from {} rows".format(i + 1, i_next, df_length))
-                    self.delete_old_data(df_in.iloc[i:i_next,:],table_name_in, list_key, math_logic, debug)
-                    i += partition_delete
-            #Dump df_in append to database
-            self.dump_main(df_in, table_name_in ,mode_in = 'append')
-            if not self.mute : print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
+        with self.engine.connect() as con : 
+            trans = con.begin()
+            try :
+                if len(df_in) == 0 : 
+                    if not self.mute : print('No Data to dump into',table_name_in,' End ',pd.Timestamp.now())
+                else :
+                    if len(df_in) <= partition_delete : 
+                        self.delete_old_data(df_in, table_name_in, list_key, math_logic, debug, con = con)
+                    else :
+                        i, df_length = 0, len(df_in)
+                        while i < df_length :
+                            i_next = i + partition_delete
+                            if not self.mute : print("Processing {}-{} row from {} rows".format(i + 1, i_next, df_length))
+                            self.delete_old_data(df_in.iloc[i:i_next,:],table_name_in, list_key, math_logic, debug, con = con)
+                            i += partition_delete
+                    #Dump df_in append to database
+                    self.dump_main(df_in, table_name_in ,mode_in = 'append', con = con)
+                    trans.commit()
+                    if not self.mute : print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
+            except Exception as e :
+                print(e)
+                if not self.mute : print('Error During Dump to ',table_name_in,' Begin Rollback ',pd.Timestamp.now())
+                trans.rollback()
+                if not self.mute : print('Rollback ',table_name_in,' End ',pd.Timestamp.now())
 
     def dump_new(self, df_in, table_name_in, list_key , debug = False) :
         """Delete exists row of df that has same key(s) as table and dump df_in append to table"""
-
-        # Check if Table existing or not
-        if inspect(self.engine).has_table(table_name_in) :
-            if not self.mute : print('Start Filter Existing data from df at ',pd.Timestamp.now())
-            
-            df_out = df_in.copy()
-            #for single key
-            if 'str' in str(type(list_key))  :  list_key = [list_key]
-
-            if 'list' in str(type(list_key)) :
-                if not min(x in df_out.columns for x in list_key) :
-                    raise Exception("Some keys are not in df's columns")
-                i = 0
-                df_out['key_sql_filter'] = ''
-                sql_q = 'SELECT DISTINCT '
-                while i < len(list_key) :
-                    filter_name = list_key[i]
-                    if i != 0 : sql_q += ' , '
-                    df_out['key_sql_filter'] = df_out['key_sql_filter'].astype('str') + df_out[filter_name].astype('str')
-                    sql_q += self.begin_name +  filter_name + self.end_name + ' ' 
-                    i += 1
-                sql_q += ' FROM ' + self.dataset + table_name_in
-                if debug : print(sql_q)
-                if (self.credentials != '') & (self.sql_type == 'BIGQUERY') :
-                    filter_filter = pd.read_gbq(sql_q,project_id = self.project_id,credentials = self.credentials)
-                else :
-                    with self.engine.connect() as conn :
-                        filter_filter = pd.read_sql_query(sql_q, con = conn)
-                # filter_filter = pd.read_sql_query(sql_q, con = self.engine)
-                filter_filter['key_sql_filter'] = ''
-                for i in filter_filter.columns :
-                    if  i == 'key_sql_filter' : pass
-                    else : filter_filter['key_sql_filter'] = filter_filter['key_sql_filter'].astype('str') + filter_filter[i].astype('str')
-                if debug : print(filter_filter.head())
-                filter_filter = filter_filter['key_sql_filter'].unique()
-                if debug : print('======filter======\n',filter_filter,'\n======in======\n',df_out.head())
-                logic_filter = ~df_out['key_sql_filter'].isin(filter_filter)
-                df_out = df_out.drop('key_sql_filter', axis = 1)
-
-            #if key is not either string or list
-            else :
-                raise Exception("List of Key must be string or list")
-
-            df_out = df_out[logic_filter]
-            
-        else : 
-            if not self.mute : print('Table not existing at ',pd.Timestamp.now())
-
-        #Dump df_in append to database
-        if not self.mute : print('Dump data to ',table_name_in,' Begin ',pd.Timestamp.now())
-        self.dump_main( df_out, table_name_in ,mode_in = 'append') 
-        if not self.mute : print('Dump data to ',table_name_in,' End ', pd.Timestamp.now())
+        with self.engine.connect() as con : 
+            trans = con.begin()
+            try :
+                # Check if Table existing or not
+                if inspect(self.engine).has_table(table_name_in) :
+                    if not self.mute : print('Start Filter Existing data from df at ',pd.Timestamp.now())
+                    df_out = df_in.copy()
+                    #for single key
+                    if 'str' in str(type(list_key))  :  list_key = [list_key]
+                    if 'list' in str(type(list_key)) :
+                        if not min(x in df_out.columns for x in list_key) :
+                            raise Exception("Some keys are not in df's columns")
+                        i = 0
+                        df_out['key_sql_filter'] = ''
+                        sql_q = 'SELECT DISTINCT '
+                        while i < len(list_key) :
+                            filter_name = list_key[i]
+                            if i != 0 : sql_q += ' , '
+                            df_out['key_sql_filter'] = df_out['key_sql_filter'].astype('str') + df_out[filter_name].astype('str')
+                            sql_q += self.begin_name +  filter_name + self.end_name + ' ' 
+                            i += 1
+                        sql_q += ' FROM ' + self.dataset + table_name_in
+                        if debug : print(sql_q)
+                        if (self.credentials != '') & (self.sql_type == 'BIGQUERY') :
+                            filter_filter = pd.read_gbq(sql_q,project_id = self.project_id,credentials = self.credentials)
+                        else :
+                            # with self.engine.connect() as con :
+                            filter_filter = pd.read_sql_query(sql_q, con = con)
+                        # filter_filter = pd.read_sql_query(sql_q, con = self.engine)
+                        filter_filter['key_sql_filter'] = ''
+                        for i in filter_filter.columns :
+                            if  i == 'key_sql_filter' : pass
+                            else : filter_filter['key_sql_filter'] = filter_filter['key_sql_filter'].astype('str') + filter_filter[i].astype('str')
+                        if debug : print(filter_filter.head())
+                        filter_filter = filter_filter['key_sql_filter'].unique()
+                        if debug : print('======filter======\n',filter_filter,'\n======in======\n',df_out.head())
+                        logic_filter = ~df_out['key_sql_filter'].isin(filter_filter)
+                        df_out = df_out.drop('key_sql_filter', axis = 1)
+                    #if key is not either string or list
+                    else :
+                        raise Exception("List of Key must be string or list")
+                    df_out = df_out[logic_filter]
+                else : 
+                    if not self.mute : print('Table not existing at ',pd.Timestamp.now())
+                #Dump df_in append to database
+                if not self.mute : print('Dump data to ',table_name_in,' Begin ',pd.Timestamp.now())
+                self.dump_main( df_out, table_name_in ,mode_in = 'append', con = con) 
+                trans.commit()
+                if not self.mute : print('Dump data to ',table_name_in,' End ', pd.Timestamp.now())
+            except Exception as e :
+                print(e)
+                if not self.mute : print('Error During Dump to ',table_name_in,' Begin Rollback ',pd.Timestamp.now())
+                trans.rollback()
+                if not self.mute : print('Rollback ',table_name_in,' End ',pd.Timestamp.now())
 
 class da_tran_SQL :
     """interact with SQL : Update 2021-11-25
