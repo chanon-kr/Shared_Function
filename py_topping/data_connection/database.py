@@ -94,23 +94,32 @@ class lazy_SQL :
                 with self.engine.connect() as conn :
                     print(pd.read_sql_query("""SELECT 'Connection OK'""", con = conn).iloc[0,0]) 
 
-    def sub_dump(self, df_in,table_name_in,mode_in) :
-        """normal to_sql for dask's delayed in dump_main"""
-        if (self.credentials != '') & (self.sql_type == 'BIGQUERY') :
-            # print('{}{}'.format(self.dataset , table_name_in)) # For Debug
-            df_in.to_gbq('{}{}'.format(self.dataset , table_name_in),project_id = self.project_id
-                                        ,credentials = self.credentials , if_exists = mode_in) #, reauth = True
-        else :
-            with self.engine.connect() as conn :
-                df_in.to_sql(table_name_in, con = conn, index = False,if_exists = mode_in,chunksize = self.chunksize, method = self.method)
-        return len(df_in)
+    # def sub_dump(self, df_in,table_name_in,mode_in) :
+    #     """normal to_sql for dask's delayed in dump_main"""
+    #     if (self.credentials != '') & (self.sql_type == 'BIGQUERY') :
+    #         # print('{}{}'.format(self.dataset , table_name_in)) # For Debug
+    #         df_in.to_gbq('{}{}'.format(self.dataset , table_name_in),project_id = self.project_id
+    #                                     ,credentials = self.credentials , if_exists = mode_in) #, reauth = True
+    #     else :
+    #         with self.engine.connect() as conn :
+    #             df_in.to_sql(table_name_in, con = conn, index = False,if_exists = mode_in,chunksize = self.chunksize, method = self.method)
+    #     return len(df_in)
 
     def dump_main(self, df_in, table_name_in ,mode_in) :
         """Divide and Dump Dataframe Into Database"""
         i, j, sum_len, df_length = 0, 1, 0, len(df_in)
         while i < df_length :
             i_next = i + self.partition_size
-            sum_len += self.sub_dump(df_in.iloc[i:i_next,:],table_name_in,mode_in) 
+            # sum_len += self.sub_dump(df_in.iloc[i:i_next,:],table_name_in,mode_in) 
+            df_dump = df_in.iloc[i:i_next,:]
+            sum_len += len(df_dump)
+            if (self.credentials != '') & (self.sql_type == 'BIGQUERY') :
+                # print('{}{}'.format(self.dataset , table_name_in)) # For Debug
+                df_dump.to_gbq('{}{}'.format(self.dataset , table_name_in),project_id = self.project_id
+                                            ,credentials = self.credentials , if_exists = mode_in) #, reauth = True
+            else :
+                with self.engine.connect() as conn :
+                    df_dump.to_sql(table_name_in, con = conn, index = False,if_exists = mode_in,chunksize = self.chunksize, method = self.method)
             j += 1
             i += self.partition_size
         return sum_len
