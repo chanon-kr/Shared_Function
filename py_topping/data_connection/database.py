@@ -107,14 +107,12 @@ class lazy_SQL :
 
     def dump_main(self, df_in, table_name_in ,mode_in) :
         """Divide and Dump Dataframe Into Database"""
-        if len(df_in) <= self.partition_size : sum_len = self.sub_dump(df_in,table_name_in,mode_in) 
-        else :
-            i, j, sum_len, df_length = 0, 1, 0, len(df_in)
-            while i < df_length :
-                i_next = i + self.partition_size
-                sum_len += self.sub_dump(df_in.iloc[i:i_next,:],table_name_in,mode_in) 
-                j += 1
-                i += self.partition_size
+        i, j, sum_len, df_length = 0, 1, 0, len(df_in)
+        while i < df_length :
+            i_next = i + self.partition_size
+            sum_len += self.sub_dump(df_in.iloc[i:i_next,:],table_name_in,mode_in) 
+            j += 1
+            i += self.partition_size
         return sum_len
 
 
