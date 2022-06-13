@@ -72,6 +72,8 @@ class lazy_SP365:
                     local_file.write(response.content) # write in your pc
                 print('Download OK File')
         else :
+            print(f'Return with error code : {response.status_code}')
+            print(f'Content of error : {response.content}')
             raise Exception('Cannot Download File')
 
     def upload(self, sharepoint_location, local_location):
