@@ -80,5 +80,4 @@ class lazy_API :
     def run(self, port = 8080, host = "0.0.0.0") :
         """To run FastAPI"""
         self.gen_doc()
-        if __name__ == "__main__":
-            uvicorn.run(self.app, port=int(os.environ.get("PORT", port)), host = host)
+        uvicorn.run(self.app, port=int(os.environ.get("PORT", port)), host = host)
