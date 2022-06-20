@@ -54,7 +54,7 @@ class lazy_API :
         """Create Auth Doc"""
         @self.app.get("/openapi.json", include_in_schema=False)
         async def openapi(username: str = Depends(self.get_current_username)):
-            return get_openapi(title=app.title, version=app.version, routes=app.routes)
+            return get_openapi(title=self.app.title, version=self.app.version, routes=self.app.routes)
         @self.app.route('/')
         @self.app.get("/docs", include_in_schema=False)
         async def get_swagger_documentation(username: str = Depends(self.get_current_username)):
