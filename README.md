@@ -1,4 +1,4 @@
-<img src="https://user-images.githubusercontent.com/64777509/179343808-7d04effe-d9bd-446c-bf79-8abf7b56540d.jpg" width="228">
+<img src="https://user-images.githubusercontent.com/64777509/179343808-7d04effe-d9bd-446c-bf79-8abf7b56540d.jpg" align="center" width="228">
 
 # py_topping, a topping on some already great libraries
 ## I create this library to simplify and standardize my friends' projects
