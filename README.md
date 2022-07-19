@@ -1,8 +1,7 @@
 <img src="https://user-images.githubusercontent.com/64777509/179344226-e9440447-a69d-46c1-a535-d18c1680e73d.jpg" align="center" width="228">
 
-# py_topping, a topping on some already great libraries
-## I create this library to simplify and standardize my friends' projects
-This library focus on "simplify" (& lazy) not performance <br><br>
+# py_topping, a topping on great libraries
+## This library focus on "simplify" (& laziness :P) <br><br>
 
 PyPi Project Page : (https://pypi.org/project/py-topping)
 <br><br>To Install a Stable Version<br>
@@ -14,7 +13,7 @@ pip install py-topping
 pip install git+https://github.com/chanon-kr/Shared_Function.git
 ```
 <br>
-This library will *NOT auto install dependencies for you but you could see the list of dependencies in sample links<br><br>
+This library will **NOT auto install dependencies** for you but you could see the list of dependencies in sample links<br><br>
 You could see samples of how to use this library inside the samples folder in github<br>
 (https://github.com/chanon-kr/Shared_Function)
 <br>
