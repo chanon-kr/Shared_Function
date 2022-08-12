@@ -10,16 +10,17 @@ from datetime import datetime
 import os , csv , re, socket, requests, string, random
 
 class email_sender :
-    def __init__(self, user, password, servername):
+    def __init__(self, user, password, servername, port = 0, timeout = 30):
         """Store username , password and servername"""
         self.servername = servername
         self.password = password
         self.sender = user
+        self.port, self.timeout = port, timeout
         
     def executor(self,recipients, message ):    
         """Connect to Server and Send Email, will return status of sending in text""" 
         #Create Connection
-        smtpObj = smtplib.SMTP(self.servername, timeout = 30)    
+        smtpObj = smtplib.SMTP(self.servername, port = self.port, timeout = self.timeout)    
         smtpObj.login(self.sender.split('@')[0], self.password)
         ssl.create_default_context()
         try :
