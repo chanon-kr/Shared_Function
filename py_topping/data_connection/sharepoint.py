@@ -52,6 +52,8 @@ class lazy_SP365:
         print('Authen OK')
 
     def create_link(self, file_link):
+        if 'personal' in self.site_url : 
+            print("There's a 'personal' in your url.\nIf it's a sharepoint personal not a sharepoint site, please create the download parh from /personal/{YOUR MAIL}/Document/{Your Folder Name}/{Your File Name}")
         file_name = file_link.split('/')[-1]
         link = '/sites' + file_link.replace(file_name,'').split('sites')[-1]
         link += file_name.split('?')[0]
