@@ -30,15 +30,15 @@ https://github.com/chanon-kr/Shared_Function
 
 ***
 ### sharepoint
-  - to download file from SP365 or SP on prim
-  - to read csv/excel from SP365 as pandas dataframe
-  - to download List as csv or pandas dataframe from SP365
-  - upload file to SP365 or SP on prim
+  - To download file from SP365 or SP on prim
+  - To read csv/excel from SP365 as pandas dataframe
+  - To download List as csv or pandas dataframe from SP365
+  - To upload file to SP365 or SP on prim
   - Dependecies and Sample of use => https://github.com/chanon-kr/Shared_Function/blob/main/samples/sharepoint.ipynb
 
 ***
 ### gcp
-  - to download and upload file from GCP's bucket Storage
+  - To download and upload file from GCP's bucket Storage
   - Dependecies and Sample of use => https://github.com/chanon-kr/Shared_Function/blob/main/samples/gcp.ipynb
 
 ***
@@ -69,8 +69,8 @@ https://github.com/chanon-kr/Shared_Function
 
 ***
 ### run_pipeline
-  - to run your python or notebook scripts 
-  - to create FastAPI
+  - To run your python or notebook scripts 
+  - To create FastAPI
   - Dependecies and Sample of use  
     - run pipeline=> https://github.com/chanon-kr/Shared_Function/blob/main/samples/run_pipeline.ipynb
     - create FastAPI => https://github.com/chanon-kr/Shared_Function/blob/main/samples/api.ipynb
