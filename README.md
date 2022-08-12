@@ -3,19 +3,19 @@
 # py_topping, a topping on great libraries
 ## This library focus on "simplify" (& laziness :P) <br><br>
 
-PyPi Project Page : (https://pypi.org/project/py-topping)
-<br><br>To Install a Stable Version<br>
+PyPi Project Page : https://pypi.org/project/py-topping
+<br><br>To Install the Stable Version<br>
 ```python
 pip install py-topping
 ```
-<br>To Install a Newest Version<br>
+<br>To Install the Newest Version<br>
 ```python
 pip install git+https://github.com/chanon-kr/Shared_Function.git
 ```
 <br>
-This library will **NOT auto install dependencies** for you but you could see the list of dependencies in sample links<br><br>
+This library will *NOT auto install dependencies for you but you could see the list of dependencies in sample links<br><br>
 You could see samples of how to use this library inside the samples folder in github<br>
-(https://github.com/chanon-kr/Shared_Function)
+https://github.com/chanon-kr/Shared_Function
 <br>
 
 ***
