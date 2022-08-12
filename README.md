@@ -26,7 +26,7 @@ You could see samples of how to use this library inside the samples folder in gi
     - from 0.3.18, will roll back if job fail, except Google BigQuery
   - Can't read Store Procedure in PostGreSQL will solve this in later version
   - Will working with Oracle Database in later version
-  - Denpendecies and Sample of use => https://github.com/chanon-kr/Shared_Function/blob/main/samples/database.ipynb
+  - Dependecies and Sample of use => https://github.com/chanon-kr/Shared_Function/blob/main/samples/database.ipynb
 
 ***
 ### sharepoint
@@ -34,19 +34,23 @@ You could see samples of how to use this library inside the samples folder in gi
   - to read csv/excel from SP365 as pandas dataframe
   - to download List as csv or pandas dataframe from SP365
   - upload file to SP365 or SP on prim
-  - Denpendecies and Sample of use => https://github.com/chanon-kr/Shared_Function/blob/main/samples/sharepoint.ipynb
+  - Dependecies and Sample of use => https://github.com/chanon-kr/Shared_Function/blob/main/samples/sharepoint.ipynb
 
 ***
 ### gcp
   - to download and upload file from GCP's bucket Storage
-  - Denpendecies and Sample of use => https://github.com/chanon-kr/Shared_Function/blob/main/samples/gcp.ipynb
+  - Dependecies and Sample of use => https://github.com/chanon-kr/Shared_Function/blob/main/samples/gcp.ipynb
 
+***
+### socket
+  - To receive and send data though socket (TCP/IP)
+  - Dependecies and Sample of use => https://github.com/chanon-kr/Shared_Function/blob/main/samples/lazy_TCP.ipynb
 ***
 ### data_preparation
   - Encode categorical column
   - Create lagging parameter
   - Simple Deep Learning Model for Regression
-  - Denpendecies and Sample of use 
+  - Dependecies and Sample of use 
     - Data Prep => https://github.com/chanon-kr/Shared_Function/blob/main/samples/data_preparation.ipynb
     - Simple Deep Learning => https://github.com/chanon-kr/Shared_Function/blob/main/samples/lazy_ml.ipynb
 
@@ -58,7 +62,7 @@ You could see samples of how to use this library inside the samples folder in gi
   - To send LINE message, sticker or picture with line notify
   - To Create diff hour of (Desired UTC) - (Environment UTC)
   - To Check health of your machine
-  - Denpendecies and Sample of use
+  - Dependecies and Sample of use
     - LINE => https://github.com/chanon-kr/Shared_Function/blob/main/samples/lazy_LINE.ipynb
     - EMAIL => https://github.com/chanon-kr/Shared_Function/blob/main/samples/email_sender.ipynb
     - Other => https://github.com/chanon-kr/Shared_Function/blob/main/samples/other_function.ipynb
@@ -67,6 +71,6 @@ You could see samples of how to use this library inside the samples folder in gi
 ### run_pipeline
   - to run your python or notebook scripts 
   - to create FastAPI
-  - Denpendecies and Sample of use  
+  - Dependecies and Sample of use  
     - run pipeline=> https://github.com/chanon-kr/Shared_Function/blob/main/samples/run_pipeline.ipynb
     - create FastAPI => https://github.com/chanon-kr/Shared_Function/blob/main/samples/api.ipynb
