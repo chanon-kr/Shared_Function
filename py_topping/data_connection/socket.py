@@ -9,8 +9,10 @@ class lazy_TCP :
             s.connect((self.host, self.port))
             if auto_encode : send_message = str.encode(send_message)
             s.sendall(send_message)
-            if wait_return : data = s.recv(1024)
-        return data
+            if wait_return : 
+                data = s.recv(1024)
+                return data
+            else : return None
     
     def listen(self, debug = False, send_return = True) :
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s :
