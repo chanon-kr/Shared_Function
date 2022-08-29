@@ -14,7 +14,9 @@ class lazy_API :
     def __init__(self, title, version, description
                      , username = 'user'
                      , password = 'password'
-                     , api_weak_authen = False) :
+                     , api_weak_authen = False
+                     , callback = None
+                ) :
         """lazy_API class, to create FastAPI with a few lines of code"""
         ## Create Fast API
         self.app = FastAPI(   title= title
@@ -27,6 +29,8 @@ class lazy_API :
         self.storage = [base64.b64encode(username.encode('ascii')),
                         base64.b64encode(password.encode('ascii'))]
         self.api_weak_authen = api_weak_authen
+        ## Add Default Callback
+        self.callback = callback
 
     ## Basic Authen
     def get_current_username(self, credentials: HTTPBasicCredentials = Depends(HTTPBasic())):
@@ -63,8 +67,11 @@ class lazy_API :
         async def get_redoc_documentation(username: str = Depends(self.get_current_username)):
             return get_redoc_html(openapi_url="/openapi.json", title="docs")
 
-    def create_post(self, function, name, tags = [], example = {}) :
+    def create_post(self, function, name, tags = [], example = {}, callback = 'default') :
         """Create POST Method for FastAPI"""
+        # Assign Default Callback
+        if (type(callback) == str) : 
+            if callback == 'default' : callback = self.callback
         @self.app.post(f'/{name}' , tags = tags)
         async def post_function(  payload : dict = Body(... , example = example)
                                 , username : str = Depends( self.api_get_current_username if self.api_weak_authen 
@@ -72,10 +79,16 @@ class lazy_API :
                                 ) :
             try :
                 return function(payload)
-            except  :
+            except Exception as e :
                 print(traceback.format_exc())
+                if callback == None : 
+                    return_error = {"error": str(traceback.format_exc())}
+                else : 
+                    return_error = callback({ 'traceback' : traceback.format_exc() 
+                                            , 'exception' : e 
+                                            , 'input' : payload})
                 return JSONResponse(status_code=500
-                                    , content={"error": str(traceback.format_exc())})
+                                    , content=return_error)
 
     def run(self, port = 8080, host = "0.0.0.0") :
         """To run FastAPI"""
