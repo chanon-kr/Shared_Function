@@ -68,6 +68,12 @@ https://github.com/chanon-kr/Shared_Function
     - Other => https://github.com/chanon-kr/Shared_Function/blob/main/samples/other_function.ipynb
 
 ***
+### opc
+  - to read value from OPC UA
+  - to write value to OPC UA
+  - Dependecies and Sample of use 
+    - OPC UA => https://github.com/chanon-kr/Shared_Function/blob/main/samples/lazy_OPCUA.ipynb
+***
 ### run_pipeline
   - To run your python or notebook scripts 
   - To create FastAPI
