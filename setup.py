@@ -20,7 +20,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/chanon-kr/Shared_Function",
-    download_url = "https://github.com/chanon-kr/Shared_Function/archive/v0.4.3.tar.gz",
+    download_url = "https://github.com/chanon-kr/Shared_Function/archive/v0.4.4.tar.gz",
     keywords = ["utility","ETL"],
     packages=setuptools.find_packages(),
     classifiers=[
