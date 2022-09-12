@@ -5,17 +5,19 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
+from email.utils import formataddr
 import mimetypes
 from datetime import datetime
 import os , csv , re, socket, requests, string, random
 
 class email_sender :
-    def __init__(self, user, password, servername, port = 0, timeout = 30):
+    def __init__(self, user, password, servername, port = 0, timeout = 30, sender_name = None):
         """Store username , password and servername"""
         self.servername = servername
         self.password = password
         self.sender = user
         self.port, self.timeout = port, timeout
+        self.sender_name = sender_name
         
     def executor(self,recipients, message ):    
         """Connect to Server and Send Email, will return status of sending in text""" 
@@ -50,7 +52,7 @@ class email_sender :
             message.attach(base_attach)
         return message
 
-    def send(self, sendto,subject,text_in , attachment = None):
+    def send(self, sendto,subject,text_in , attachment = None, sender_name = None):
         """Create Message Part"""
         #split for multple
         recipients = sendto.split(";")
@@ -58,7 +60,9 @@ class email_sender :
         #Create Head of Email
         message = MIMEMultipart()
         #message = EmailMessage()
-        message["From"] = self.sender
+        if sender_name == None : sender_name = self.sender_name
+        if sender_name == None : message["From"] = self.sender
+        else : message['From'] = formataddr((str(sender_name), self.sender))
         message["To"] =  ', '.join(recipients)
         message["Subject"] = subject
 
