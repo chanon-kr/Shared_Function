@@ -40,10 +40,12 @@ class lazy_OPCUA :
         else : multiple_node = False
         with self.con as con :
             if multiple_node :
-                for i in node :
-                    var = con.get_node(i)
-                    var.set_value(value)
-                    out.append(value)
+                i, size = 0, len(node)
+                while i < size :
+                    var = con.get_node(node[i])
+                    var.set_value(value[i])
+                    out.append(value[i])
+                    i += 1
             else : 
                 var = con.get_node(node)
                 var.set_value(value)
