@@ -22,7 +22,7 @@ app = lazy_API(title = 'DB to GCS'
              , description= 'Database to Google Cloud Storage'
              , username = 'user'
              , password = 'password'
-             , api_weak_authen= True
+             , api_weak_authen= False
              , callback= callback
              )
 

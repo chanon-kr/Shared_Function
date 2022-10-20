@@ -20,7 +20,7 @@ app = lazy_API(title = 'DB to DB'
              , description= 'Database to Database'
              , username = 'user'
              , password = 'password'
-             , api_weak_authen= True
+             , api_weak_authen= False
              , callback= callback
              )
 
@@ -54,7 +54,7 @@ def db_to_db(x) :
 ## Insert Function into the App
 app.create_post(function = db_to_db
               , name = 'DB to DB'
-              , tag = ['db','db']
+              , tag = ['db']
               , example = {}
               , callback = 'default')
 
