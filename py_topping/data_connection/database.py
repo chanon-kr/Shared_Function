@@ -355,6 +355,7 @@ class lazy_SQL :
 
     def dump_replace(self, df_in, table_name_in, list_key, math_logic = '', partition_delete = 50000, debug = False):
         """Delete exists row of table in database with same key(s) as df and dump df append to table"""
+        result = {}
         with self.engine.connect() as con : 
             trans = con.begin()
             try :
@@ -374,11 +375,14 @@ class lazy_SQL :
                     self.dump_main(df_in, table_name_in ,mode_in = 'append', con = con)
                     trans.commit()
                     if not self.mute : print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
+                    result['result'] = True
             except Exception as e :
                 print(e)
                 if not self.mute : print('Error During Dump to ',table_name_in,' Begin Rollback ',pd.Timestamp.now())
                 trans.rollback()
                 if not self.mute : print('Rollback ',table_name_in,' End ',pd.Timestamp.now())
+                result['result'], result['error'] = False, e
+            return result
 
     def dump_new(self, df_in, table_name_in, list_key , debug = False) :
         """Delete exists row of df that has same key(s) as table and dump df_in append to table"""
