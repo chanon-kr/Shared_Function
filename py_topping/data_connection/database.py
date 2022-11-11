@@ -1,5 +1,5 @@
 import pandas as pd
-from sqlalchemy import create_engine , inspect
+from sqlalchemy import create_engine , inspect, text
 import os
 from urllib.parse import quote_plus
 from datetime import datetime
