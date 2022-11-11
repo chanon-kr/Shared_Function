@@ -2,6 +2,7 @@ import pandas as pd
 from sqlalchemy import create_engine , inspect
 import os
 from urllib.parse import quote_plus
+from datetime import datetime
 
 
 class lazy_SQL :
@@ -276,6 +277,81 @@ class lazy_SQL :
             if not self.mute : print('Delete Last '+str(list_key)+' at',pd.Timestamp.now())
         else :
             if not self.mute : print('Do not have table to delete at',pd.Timestamp.now())
+
+
+    def create_merge_statement(self, sql_type, DATASET , DESTINATION_TABLE ,TEMP_TABLE ,SCHEMA, list_key, list_column, list_value) :
+        key_columns_string = ' , '.join([i for i in list_key])
+        now = datetime.now().strftime('%Y%m%d%H%M%S')
+        create_index, drop_index = [], []
+        for i in [DESTINATION_TABLE , TEMP_TABLE] :
+            create_index.append(f"CREATE UNIQUE INDEX topping{i}{now} ON {i} ({key_columns_string})")
+            if sql_type == 'postgresql' : drop_index.append(f"DROP INDEX topping{i}{now};")
+            else : drop_index.append(f"DROP INDEX topping{i}{now} ON {i} ;")
+
+        if len(list_value) == 0 : update_value_str = " , ".join([f"""{i} = SOURCE.{i}""" for i in list_key])
+        else : update_value_str = " , ".join([f"""{i} = SOURCE.{i}""" for i in list_value])
+
+        if sql_type == 'MYSQL' : 
+            columns_list_str = " , ".join([i for i in list_column])
+            columns_list_str2 = " , ".join([f'SOURCE.{i}' for i in list_column])
+            sql_statement = f' INSERT INTO {DESTINATION_TABLE} ({columns_list_str})'
+            sql_statement += f' SELECT {columns_list_str2} FROM {TEMP_TABLE}  AS SOURCE'
+            sql_statement += f' ON DUPLICATE KEY UPDATE {update_value_str}'
+            return sql_statement, create_index, drop_index
+
+        if sql_type == 'MSSQL' : DATASET = f'{DATASET}.{SCHEMA}'
+        
+        if sql_type == 'POSTGRESQL' : sql_statement = f"""MERGE INTO {DESTINATION_TABLE} TARGET USING {TEMP_TABLE} SOURCE ON """
+        else : sql_statement = f"""MERGE {DATASET}.{DESTINATION_TABLE} TARGET USING {DATASET}.{TEMP_TABLE} SOURCE ON """
+
+        sql_statement += " AND ".join([f"""TARGET.{i} = SOURCE.{i}""" for i in list_key])
+        sql_statement += f""" WHEN MATCHED THEN UPDATE SET """
+        sql_statement += update_value_str
+
+        if sql_type == 'POSTGRESQL' : sql_statement += f""" WHEN NOT MATCHED THEN INSERT ("""
+        else : sql_statement += f""" WHEN NOT MATCHED BY TARGET THEN INSERT ("""
+
+        sql_statement += " , ".join([i for i in list_column])
+        sql_statement += f""") VALUES ("""      
+        sql_statement += " , ".join([i for i in list_column])
+        sql_statement += f""") ;"""
+
+        return sql_statement, create_index, drop_index
+
+    def upsert(self, df_in, table_name_in, list_key, debug = False, indexed = False, keep_temp = False) :
+        list_column = df_in.columns
+        list_value = [i for i in list_column if i not in list_key]
+        result = {}
+        if self.sql_type == 'MYSQL' : indexed = True
+        TEMP_TABLE = f"{table_name_in}topping{datetime.now().strftime('%Y%m%d%H%M%S')}" 
+        sql_statement, create_index, drop_index = self.create_merge_statement(
+                                      sql_type = self.sql_type, DATASET = self.database_name
+                                    , DESTINATION_TABLE = table_name_in
+                                    , TEMP_TABLE = TEMP_TABLE
+                                    , SCHEMA = 'dbo', list_key = list_key, list_column = list_column, list_value = list_value)
+        with self.engine.connect() as con :
+            try : 
+                trans = con.begin()
+                self.dump_whole( df_in , TEMP_TABLE)
+                if indexed : 
+                    for i in create_index : 
+                        if debug : print(i)
+                        con.execute(text(i))
+                if debug : print(sql_statement)
+                con.execute(text(sql_statement))
+                if indexed : 
+                    for i in drop_index : 
+                        if debug : print(i)
+                        con.execute(text(i))
+                if not keep_temp : con.execute(text(f'DROP TABLE {TEMP_TABLE}'))
+                else : result['temp'] = TEMP_TABLE
+                trans.commit()
+                result['result'] = True
+            except Exception as e :
+                if debug : print(e)
+                trans.rollback()
+                result['result'], result['error'] = False, e
+        return result
 
     def dump_replace(self, df_in, table_name_in, list_key, math_logic = '', partition_delete = 50000, debug = False):
         """Delete exists row of table in database with same key(s) as df and dump df append to table"""
