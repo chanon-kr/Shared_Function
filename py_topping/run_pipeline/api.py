@@ -1,5 +1,5 @@
 ## FastAPI Core
-from fastapi import FastAPI, Body
+from fastapi import FastAPI, Body, Request
 from fastapi.responses import JSONResponse
 import os, traceback, uvicorn
 ## Security Basic Auth
@@ -9,6 +9,8 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 ## Add Doc Security
 from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
+# Get Query Parameter
+# from pydantic import create_model
 
 class lazy_API :
     def __init__(self, title, version, description
