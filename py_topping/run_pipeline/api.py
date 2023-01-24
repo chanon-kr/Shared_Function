@@ -115,7 +115,7 @@ class lazy_API :
                                 ) :
             try :
                 params = request.query_params
-                return function(**params)
+                return function(params)
             except Exception as e :
                 print(traceback.format_exc())
                 if callback == None : 
