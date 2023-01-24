@@ -35,7 +35,7 @@ class lazy_API :
         self.callback = callback
 
     ## Basic Authen
-    def get_current_username(self, credentials: HTTPBasicCredentials = Depends(HTTPBasic())):
+    def basic_authen_check(self, credentials: HTTPBasicCredentials = Depends(HTTPBasic())):
         """Basic Authentication"""
         correct_username = secrets.compare_digest(credentials.username, base64.b64decode(self.storage[0]).decode('ascii'))
         correct_password = secrets.compare_digest(credentials.password, base64.b64decode(self.storage[1]).decode('ascii'))
@@ -44,17 +44,24 @@ class lazy_API :
                 detail="Incorrect email or password",
                 headers={"WWW-Authenticate": "Basic"},)
     ## For API
-    def api_get_current_username(self, payload: dict):
+    def weak_authen_check(self, input_dict):
         """
         Sub Authentication for API in order to use with GCP Authentication
         , only use this function when 'api_weak_authen' is True
         """
-        correct_username = payload.get('username','') == base64.b64decode(self.storage[0]).decode('ascii')
-        correct_password = payload.get('password','') == base64.b64decode(self.storage[1]).decode('ascii')
+        correct_username = input_dict.get('username','') == base64.b64decode(self.storage[0]).decode('ascii')
+        correct_password = input_dict.get('password','') == base64.b64decode(self.storage[1]).decode('ascii')
         if (correct_username and correct_password): return 'ok'
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Incorrect email or password",
                 headers={"WWW-Authenticate": "Basic"},)
+
+    def get_weak_authen_check(self, request: Request) :
+        params = request.query_params
+        self.weak_authen_check(params)
+
+    def post_weak_authen_check(self, payload: dict):
+        self.weak_authen_check(payload)
 
     def gen_doc(self) :           
         """Create Auth Doc"""
@@ -76,8 +83,8 @@ class lazy_API :
             if callback == 'default' : callback = self.callback
         @self.app.post(f'/{name}' , tags = tags)
         async def post_function(  payload : dict = Body(... , example = example)
-                                , username : str = Depends( self.api_get_current_username if self.api_weak_authen 
-                                                            else self.get_current_username)
+                                , username : str = Depends( self.post_weak_authen_check if self.api_weak_authen 
+                                                            else self.basic_authen_check)
                                 ) :
             try :
                 return function(payload)
@@ -103,8 +110,8 @@ class lazy_API :
         async def get_function(  
                                 # params: query_model = Depends()
                                 request: Request
-                                , username : str = Depends( self.api_get_current_username if self.api_weak_authen 
-                                                            else self.get_current_username)
+                                , username : str = Depends( self.get_weak_authen_check if self.api_weak_authen 
+                                                            else self.basic_authen_check)
                                 ) :
             try :
                 params = request.query_params
