@@ -183,6 +183,7 @@ class lazy_SQL :
 
     def dump_whole(self, df_in, table_name_in , fix_table = False, debug = False) :
         """Delete exists table and replace with new df"""
+        result = {}
         with self.engine.connect() as con : 
             trans = con.begin()
             try :
@@ -204,11 +205,14 @@ class lazy_SQL :
                 self.dump_main( df_in, table_name_in ,mode_in = 'append', con = con) 
                 trans.commit()
                 if not self.mute : print('Dump data to ',table_name_in,' End ',pd.Timestamp.now())
+                result['result'] = True
             except Exception as e :
                 print(e)
                 if not self.mute : print('Error During Dump to ',table_name_in,' Begin Rollback ',pd.Timestamp.now())
                 trans.rollback()
                 if not self.mute : print('Rollback ',table_name_in,' End ',pd.Timestamp.now())
+                result['result'], result['error'] = False, e
+            return result
 
 
     def write_in_sql(self,df_in , key) :
@@ -386,6 +390,7 @@ class lazy_SQL :
 
     def dump_new(self, df_in, table_name_in, list_key , debug = False) :
         """Delete exists row of df that has same key(s) as table and dump df_in append to table"""
+        result = {}
         with self.engine.connect() as con : 
             trans = con.begin()
             try :
@@ -435,11 +440,14 @@ class lazy_SQL :
                 self.dump_main( df_out, table_name_in ,mode_in = 'append', con = con) 
                 trans.commit()
                 if not self.mute : print('Dump data to ',table_name_in,' End ', pd.Timestamp.now())
+                result['result'] = True
             except Exception as e :
                 print(e)
                 if not self.mute : print('Error During Dump to ',table_name_in,' Begin Rollback ',pd.Timestamp.now())
                 trans.rollback()
                 if not self.mute : print('Rollback ',table_name_in,' End ',pd.Timestamp.now())
+                result['result'], result['error'] = False, e
+            return result
 
 class da_tran_SQL :
     """interact with SQL : Update 2021-11-25
