@@ -1,5 +1,5 @@
 ## FastAPI Core
-from fastapi import FastAPI, Body
+from fastapi import FastAPI, Body, Request
 from fastapi.responses import JSONResponse
 import os, traceback, uvicorn
 ## Security Basic Auth
@@ -9,6 +9,8 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 ## Add Doc Security
 from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
+# Get Query Parameter
+# from pydantic import create_model
 
 class lazy_API :
     def __init__(self, title, version, description
@@ -90,6 +92,34 @@ class lazy_API :
                 return JSONResponse(status_code=500
                                     , content=return_error)
 
+
+    def create_get(self, function, name, tags = [], example = {}, callback = 'default') :
+        """Create GET Method for FastAPI"""
+        # Assign Default Callback
+        if (type(callback) == str) : 
+            if callback == 'default' : callback = self.callback
+        # query_model = create_model("Query", **query_params)
+        @self.app.get(f'/{name}' , tags = tags)
+        async def get_function(  
+                                # params: query_model = Depends()
+                                request: Request
+                                , username : str = Depends( self.api_get_current_username if self.api_weak_authen 
+                                                            else self.get_current_username)
+                                ) :
+            try :
+                params = request.query_params
+                return function(**params)
+            except Exception as e :
+                print(traceback.format_exc())
+                if callback == None : 
+                    return_error = {"error": str(traceback.format_exc())}
+                else : 
+                    return_error = callback({ 'traceback' : traceback.format_exc() 
+                                            , 'exception' : e 
+                                            , 'input' : request.query_params})
+                return JSONResponse(status_code=500
+                                    , content=return_error)
+            
     def run(self, port = 8080, host = "0.0.0.0") :
         """To run FastAPI"""
         self.gen_doc()
