@@ -66,14 +66,14 @@ class lazy_API :
     def gen_doc(self) :           
         """Create Auth Doc"""
         @self.app.get("/openapi.json", include_in_schema=False)
-        async def openapi(username: str = Depends(self.get_current_username)):
+        async def openapi(username: str = Depends(self.basic_authen_check)):
             return get_openapi(title=self.app.title, version=self.app.version, routes=self.app.routes)
         @self.app.route('/')
         @self.app.get("/docs", include_in_schema=False)
-        async def get_swagger_documentation(username: str = Depends(self.get_current_username)):
+        async def get_swagger_documentation(username: str = Depends(self.basic_authen_check)):
             return get_swagger_ui_html(openapi_url="/openapi.json", title="docs")
         @self.app.get("/redoc", include_in_schema=False)
-        async def get_redoc_documentation(username: str = Depends(self.get_current_username)):
+        async def get_redoc_documentation(username: str = Depends(self.basic_authen_check)):
             return get_redoc_html(openapi_url="/openapi.json", title="docs")
 
     def create_post(self, function, name, tags = [], example = {}, callback = 'default') :
