@@ -4,7 +4,7 @@ import os, re, traceback, sys
 import pandas as pd
 from py_topping.general_use import email_sender
 
-def run_script(script_list , out_folder = '', out_prefix = None): #, email_sender, email_sendto,email_subject ,run_output , ) :
+def run_script(script_list, short_error_message = False , out_folder = '', out_prefix = None): #, email_sender, email_sendto,email_subject ,run_output , ) :
   logs_out = []
   re_pattern = '[!@#$ %^*\+\=\?<>()\[\]\-]'
 
@@ -41,8 +41,9 @@ def run_script(script_list , out_folder = '', out_prefix = None): #, email_sende
             log_out.append(None)
             raise Exception("File Type Not Match, Please use .py or .ipynb file")
         log_out.append('OK')
-    except  :
-        log_out.append(str(traceback.format_exc()))
+    except Exception as e :
+        if short_error_message : log_out.append(str(e))
+        else : log_out.append(str(traceback.format_exc()))
 
     log_out.append(str(datetime.now()).split('.')[0])
     logs_out.append(log_out)
@@ -51,7 +52,7 @@ def run_script(script_list , out_folder = '', out_prefix = None): #, email_sende
 
 def run_pipeline(script_list = [], out_folder = '', out_prefix = None, email_dict = None , sending = False
                     , only_error = False, notebook_attached = False, attached_only_error = False, attached_log = False, log_sql = None
-                    , line_sending = None, line_subject = 'Untitled') :
+                    , line_sending = None, line_subject = 'Untitled', short_error_message = False) :
 
     if sending :
         if (['user' , 'password', 'server' ,'sendto','subject'].sort() != list(email_dict.keys()).sort()) or (email_dict == None) :
@@ -59,7 +60,7 @@ def run_pipeline(script_list = [], out_folder = '', out_prefix = None, email_dic
 
         run_output = 'Start Job at ' + str(datetime.now()) + '<br>' + '<br>'
 
-    run_log = run_script(script_list , out_folder, out_prefix )
+    run_log = run_script(script_list = script_list, short_error_message = short_error_message , out_folder = out_folder, out_prefix = out_prefix)
     out_log = run_log.copy()
 
     if log_sql != None : 
