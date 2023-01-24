@@ -133,8 +133,10 @@ def check_port(ip = None, port = None):
     r = sock.connect_ex(location)
     if r == 0:
         print("Port is open")
+        return True
     else:
         print("Port is not open")
+        return False
 
 def check_utc(utc_target) :
     current_utc = (datetime.now() - datetime.utcnow())
