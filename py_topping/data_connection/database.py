@@ -93,7 +93,7 @@ class lazy_SQL :
             self.engine = create_engine(connection_str)
             if not self.mute : 
                 with self.engine.connect() as conn :
-                    print(pd.read_sql_query("""SELECT 'Connection OK'""", con = conn).iloc[0,0]) 
+                    print(pd.read_sql_query(text("""SELECT 'Connection OK'"""), con = conn).iloc[0,0]) 
 
     def read(self, table_name_in, condition_in = '', SP = False,raw = False, param = '', columns_list = []):
         """Read Table or View or Store Procedure"""
@@ -130,10 +130,10 @@ class lazy_SQL :
             if not condition_in == '' :
                 sql_q += """ WHERE """ + condition_in
         if (self.credentials != '') & (self.sql_type == 'BIGQUERY') :
-            return pd.read_gbq(sql_q,project_id = self.project_id,credentials = self.credentials)
+            return pd.read_gbq(sql_q, project_id = self.project_id,credentials = self.credentials)
         else :
             with self.engine.connect() as conn :
-                out_ = pd.read_sql_query(sql_q , con = conn)
+                out_ = pd.read_sql_query(text(sql_q) , con = conn)
             return out_
 
     # def sub_dump(self, df_in,table_name_in,mode_in) :
@@ -187,17 +187,17 @@ class lazy_SQL :
         with self.engine.connect() as con : 
             trans = con.begin()
             try :
-                if inspect(self.engine).has_table(table_name_in) :
+                if inspect(self.engine).has_table(table_name = table_name_in) :
                     if fix_table : 
                         if not self.mute : print('Delete Existing data from Table at ',pd.Timestamp.now())
                         if self.credentials_path != None : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials_path
                         # with self.engine.connect() as con :
-                        con.execute("""DELETE FROM {}{}{}""".format(self.begin_name,table_name_in,self.end_name))
+                        con.execute(text("""DELETE FROM {}{}{}""".format(self.begin_name,table_name_in,self.end_name)))
                     else :
                         if not self.mute : print('Drop Existing Table at ',pd.Timestamp.now())
                         if self.credentials_path != None : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials_path
                         # with self.engine.connect() as con :
-                        con.execute("""DROP TABLE {}{}{}""".format(self.begin_name,table_name_in,self.end_name))
+                        con.execute(text("""DROP TABLE {}{}{}""".format(self.begin_name,table_name_in,self.end_name)))
                 else :
                     if not self.mute : print('Do not have table to delete at',pd.Timestamp.now())
                 #Dump df_in to database
@@ -272,12 +272,12 @@ class lazy_SQL :
             raise Exception("List of Key must be string or list")
         
         #Delete exiting row from table
-        if inspect(self.engine).has_table(table_name_in) :
+        if inspect(self.engine).has_table(table_name = table_name_in) :
             if not self.mute : print('Start delete old data at',pd.Timestamp.now())
             if debug : print(sql_q)
             if self.credentials_path != None : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials_path
             # with self.engine.connect() as con :
-            con.execute(sql_q)
+            con.execute(text(sql_q))
             if not self.mute : print('Delete Last '+str(list_key)+' at',pd.Timestamp.now())
         else :
             if not self.mute : print('Do not have table to delete at',pd.Timestamp.now())
@@ -395,7 +395,7 @@ class lazy_SQL :
             trans = con.begin()
             try :
                 # Check if Table existing or not
-                if inspect(self.engine).has_table(table_name_in) :
+                if inspect(self.engine).has_table(table_name = table_name_in) :
                     if not self.mute : print('Start Filter Existing data from df at ',pd.Timestamp.now())
                     df_out = df_in.copy()
                     #for single key
@@ -415,10 +415,10 @@ class lazy_SQL :
                         sql_q += ' FROM ' + self.dataset + table_name_in
                         if debug : print(sql_q)
                         if (self.credentials != '') & (self.sql_type == 'BIGQUERY') :
-                            filter_filter = pd.read_gbq(sql_q,project_id = self.project_id,credentials = self.credentials)
+                            filter_filter = pd.read_gbq(sql_q ,project_id = self.project_id,credentials = self.credentials)
                         else :
                             # with self.engine.connect() as con :
-                            filter_filter = pd.read_sql_query(sql_q, con = con)
+                            filter_filter = pd.read_sql_query(text(sql_q), con = con)
                         # filter_filter = pd.read_sql_query(sql_q, con = self.engine)
                         filter_filter['key_sql_filter'] = ''
                         for i in filter_filter.columns :
