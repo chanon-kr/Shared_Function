@@ -55,7 +55,7 @@ def sp365_to_db(x) :
 ## Insert Function into the App
 app.create_post(function = sp365_to_db
               , name = 'SP365 to DB'
-              , tag = ['sp365','db']
+              , tags = ['sp365','db']
               , example = {}
               , callback = 'default')
 
