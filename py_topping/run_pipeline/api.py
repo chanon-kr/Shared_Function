@@ -73,7 +73,8 @@ class lazy_API :
         Sub Authentication for API in order to use with GCP Authentication
         , only use this function when 'api_weak_authen' is True
         """
-        if self.authen_type == 'basic' :
+        if self.authen_type == None : return 'ok'
+        elif self.authen_type == 'basic' :
             correct_username = input_dict.get('username','') == base64.b64decode(self.storage[0]).decode('ascii')
             correct_password = input_dict.get('password','') == base64.b64decode(self.storage[1]).decode('ascii')
             if (correct_username and correct_password): return 'ok'
@@ -94,12 +95,12 @@ class lazy_API :
         self.weak_authen_check(payload)
 
     def select_authen_type(self, weak_method) :
-        if self.authen_type == 'basic' :
-            if self.api_weak_authen : return weak_method
-            else : return self.basic_authen_check
+        if self.api_weak_authen | (self.authen_type == None) :
+            return weak_method
+        elif self.authen_type == 'basic' :
+            return self.basic_authen_check
         elif self.authen_type == 'token' :
-            if self.api_weak_authen : return weak_method
-            else : return self.token_authen_check
+            return self.token_authen_check
 
     def gen_doc(self) :           
         """Create Auth Doc"""
