@@ -18,6 +18,7 @@ class lazy_API :
                      , password = 'password'
                      , api_weak_authen = False
                      , callback = None
+                     , document = True
                 ) :
         """lazy_API class, to create FastAPI with a few lines of code"""
         ## Create Fast API
@@ -33,6 +34,8 @@ class lazy_API :
         self.api_weak_authen = api_weak_authen
         ## Add Default Callback
         self.callback = callback
+        ## For On/Off Document
+        self.document = document
 
     ## Basic Authen
     def basic_authen_check(self, credentials: HTTPBasicCredentials = Depends(HTTPBasic())):
@@ -129,5 +132,5 @@ class lazy_API :
             
     def run(self, port = 8080, host = "0.0.0.0") :
         """To run FastAPI"""
-        self.gen_doc()
+        if self.document : self.gen_doc()
         uvicorn.run(self.app, port=int(os.environ.get("PORT", port)), host = host)
