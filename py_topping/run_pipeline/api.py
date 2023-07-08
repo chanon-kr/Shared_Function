@@ -5,7 +5,7 @@ import os, traceback, uvicorn
 ## Security Basic Auth
 import secrets, base64
 from fastapi import Depends, FastAPI, HTTPException, status
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi.security import HTTPBasic, HTTPBasicCredentials, HTTPBearer, HTTPAuthorizationCredentials
 ## Add Doc Security
 from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
@@ -16,7 +16,8 @@ class lazy_API :
     def __init__(self, title, version, description
                      , username = 'user'
                      , password = 'password'
-                    #  , authen = 'basic'
+                     , authen_type = 'basic' 
+                     , validate_token = None 
                      , api_weak_authen = False
                      , callback = None
                      , document = True
@@ -29,13 +30,22 @@ class lazy_API :
                             , docs_url=None
                             , redoc_url=None
                             , openapi_url = None)     
+        ## INIT authen method ####
+        assert authen_type in ['basic', 'token', None], "authen_type must be 'basic', 'token' or None"
+        self.authen_type = authen_type
         ## Initial Basic Auth
         self.storage = [base64.b64encode(username.encode('ascii')),
                         base64.b64encode(password.encode('ascii'))]
+        ## Initial Bearer Token
+        if authen_type == 'token' :
+            assert callable(validate_token) | (type(validate_token) == str), "When using authen_type 'token', validate_token must be a function or string"
+        if callable(validate_token) : self.validate_token = validate_token
+        else : 
+            self.storage_token = base64.b64encode(validate_token.encode('ascii'))
+            self.validate_token = lambda x : x == base64.b64decode(self.storage_token).decode('ascii')
+        ## Other Parameter
         self.api_weak_authen = api_weak_authen
-        ## Add Default Callback
         self.callback = callback
-        ## For On/Off Document
         self.document = document
 
     ## Basic Authen
@@ -47,18 +57,34 @@ class lazy_API :
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Incorrect email or password",
                 headers={"WWW-Authenticate": "Basic"},)
+
+    ## Bearer Token Authen ####
+    def token_authen_check(self, auth: HTTPAuthorizationCredentials = Depends(HTTPBearer())):
+        if not auth or auth.scheme != "Bearer":
+            raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+        token = auth.credentials
+        # Perform token validation logic here
+        if self.validate_token(token): return token
+        raise HTTPException(status_code=401, detail="Invalid token", headers={"WWW-Authenticate": "Bearer Token"})    
+
     ## For API
     def weak_authen_check(self, input_dict):
         """
         Sub Authentication for API in order to use with GCP Authentication
         , only use this function when 'api_weak_authen' is True
         """
-        correct_username = input_dict.get('username','') == base64.b64decode(self.storage[0]).decode('ascii')
-        correct_password = input_dict.get('password','') == base64.b64decode(self.storage[1]).decode('ascii')
-        if (correct_username and correct_password): return 'ok'
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Incorrect email or password",
-                headers={"WWW-Authenticate": "Basic"},)
+        if self.authen_type == 'basic' :
+            correct_username = input_dict.get('username','') == base64.b64decode(self.storage[0]).decode('ascii')
+            correct_password = input_dict.get('password','') == base64.b64decode(self.storage[1]).decode('ascii')
+            if (correct_username and correct_password): return 'ok'
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Incorrect email or password",
+                    headers={"WWW-Authenticate": "Basic"},)
+        elif self.authen_type == 'token' :
+            if self.validate_token(input_dict.get('token','')) : return 'ok'
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid token",
+                    headers={"WWW-Authenticate": "Bearer Token"},)
 
     def get_weak_authen_check(self, request: Request) :
         params = request.query_params
@@ -66,6 +92,14 @@ class lazy_API :
 
     def post_weak_authen_check(self, payload: dict):
         self.weak_authen_check(payload)
+
+    def select_authen_type(self, weak_method) :
+        if self.authen_type == 'basic' :
+            if self.api_weak_authen : return weak_method
+            else : return self.basic_authen_check
+        elif self.authen_type == 'token' :
+            if self.api_weak_authen : return weak_method
+            else : return self.token_authen_check
 
     def gen_doc(self) :           
         """Create Auth Doc"""
@@ -85,10 +119,11 @@ class lazy_API :
         # Assign Default Callback
         if (type(callback) == str) : 
             if callback == 'default' : callback = self.callback
+        # Assign Authen ####
+        authen_selected = self.select_authen_type(self.post_weak_authen_check)
         @self.app.post(f'/{name}' , tags = tags)
         async def post_function(  payload : dict = Body(... , example = example)
-                                , username : str = Depends( self.post_weak_authen_check if self.api_weak_authen 
-                                                            else self.basic_authen_check)
+                                , username : str = Depends( authen_selected)
                                 ) :
             try :
                 return function(payload)
@@ -109,13 +144,14 @@ class lazy_API :
         # Assign Default Callback
         if (type(callback) == str) : 
             if callback == 'default' : callback = self.callback
+        # Assign Authen ####
+        authen_selected = self.select_authen_type(self.get_weak_authen_check)
         # query_model = create_model("Query", **query_params)
         @self.app.get(f'/{name}' , tags = tags)
         async def get_function(  
                                 # params: query_model = Depends()
                                 request: Request
-                                , username : str = Depends( self.get_weak_authen_check if self.api_weak_authen 
-                                                            else self.basic_authen_check)
+                                , username : str = Depends( authen_selected)
                                 ) :
             try :
                 params = request.query_params
