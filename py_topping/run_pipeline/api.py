@@ -22,7 +22,30 @@ class lazy_API :
                      , callback = None
                      , document = True
                 ) :
-        """lazy_API class, to create FastAPI with a few lines of code"""
+        """lazy_API class, to create FastAPI with a few lines of code
+        title : Name of the API that will display in document (Str)
+        version : Version of the API that will display in document (Str)
+        description : Description of the API that will display in document (Str)
+        username :  User for Authenticate in Document and Basic Authen (Str), Default 'user'
+        password : Password for Authenticate in Document and Basic Authen (Str), Default 'password'
+        authen_type : Type of authentication ['basic','token',None], Default 'basic' 
+        validate_token : Validate Function or Token for Token Authen (Str or Function), Default None 
+        api_weak_authen : Move lazy_API's Authenticate query or parameter to - 
+                          - GET API 
+                            - Basic >> query 'username' and 'password' 
+                            - Token >> query 'token' 
+                          - POST API 
+                            - Basic >> body 'username' and 'password' 
+                            - Token >> body 'token' 
+                          To aviod conflict with GCP's authentication (Boolean), Default False
+        callback :  A custom callback when API fail.
+                    The custom callback will feed with this dict ;
+                    { 'traceback' : traceback.format_exc() 
+                    , 'exception' : e 
+                    , 'input' : query input for GET or body input for POST}
+                    (Function), Default None
+        document : To enable FastAPI's document or not (Boolean), Default True
+        """
         ## Create Fast API
         self.app = FastAPI(   title= title
                             , version= version
