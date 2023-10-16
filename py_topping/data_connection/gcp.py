@@ -156,9 +156,9 @@ class lazy_GCS :
         if destination_bucket_file == '' : destination_file_name = source_bucket_file
         else : destination_file_name = destination_bucket_file
         bucket.copy_blob(
-              source_blob = blob
+              blob= blob
             , destination_bucket = destination_bucket
-            , destination_blob_name = destination_file_name,
+            , new_name = destination_file_name,
         )
 
     def copy_folder(self, source_bucket_folder, destination_bucket_name, destination_bucket_folder = ''):
@@ -175,9 +175,9 @@ class lazy_GCS :
             if destination_bucket_folder == '' : destination_file_name = source_filename
             else : destination_file_name = source_filename.replace(source_bucket_folder, destination_bucket_folder)
             bucket.copy_blob(
-                  source_blob = blob
+                  blob= blob
                 , destination_bucket = destination_bucket
-                , destination_blob_name = destination_file_name,
+                , new_name= destination_file_name,
             )
 
 
