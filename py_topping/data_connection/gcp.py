@@ -142,6 +142,45 @@ class lazy_GCS :
                                 , all_file = deep_delete, include_self = delete_folder)
         for blob in blobs : blob.delete()
 
+    def copy(self, source_bucket_file, destination_bucket_name, destination_bucket_file = ''):
+        if self.credentials == '' : pass
+        else : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials
+        # Initialise a client
+        client = storage.Client(self.project_id)
+        # Create a bucket object for our bucket
+        bucket = client.get_bucket(self.bucket_name)
+        # Create a blob object from the filepath
+        blob = bucket.blob(source_bucket_file)
+        # Download the file to a destination
+        destination_bucket = client.get_bucket(destination_bucket_name) # Destination Bucket
+        if destination_bucket_file == '' : destination_file_name = source_bucket_file
+        else : destination_file_name = destination_bucket_file
+        bucket.copy_blob(
+              source_blob = blob
+            , destination_bucket = destination_bucket
+            , destination_blob_name = destination_file_name,
+        )
+
+    def copy_folder(self, source_bucket_folder, destination_bucket_name, destination_bucket_folder = ''):
+        if self.credentials == '' : pass
+        else : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials
+        # Initialise a client
+        client = storage.Client(self.project_id)
+        bucket = client.get_bucket(self.bucket_name) # Source Bucket
+        destination_bucket = client.get_bucket(destination_bucket_name) # Destination Bucket
+        blobs = bucket.list_blobs(prefix=source_bucket_folder)  # Get list of files
+        for blob in blobs:
+            if blob.name.endswith("/"): continue
+            source_filename = blob.name
+            if destination_bucket_folder == '' : destination_file_name = source_filename
+            else : destination_file_name = source_filename.replace(source_bucket_folder, destination_bucket_folder)
+            bucket.copy_blob(
+                  source_blob = blob
+                , destination_bucket = destination_bucket
+                , destination_blob_name = destination_file_name,
+            )
+
+
 class da_tran_bucket:
     def __init__(self, project_id, bucket_name,credential = '') :
         self.project_id = project_id
