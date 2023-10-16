@@ -48,7 +48,7 @@ class lazy_API :
         """
         ## Create Fast API
         self.app = FastAPI(   title= title
-                            , version= version
+                            , version= str(version)
                             , description= description
                             , docs_url=None
                             , redoc_url=None
@@ -64,6 +64,7 @@ class lazy_API :
             assert callable(validate_token) | (type(validate_token) == str), "When using authen_type 'token', validate_token must be a function or string"
         if callable(validate_token) : self.validate_token = validate_token
         else : 
+            if validate_token == None : validate_token = ''
             self.storage_token = base64.b64encode(validate_token.encode('ascii'))
             self.validate_token = lambda x : x == base64.b64decode(self.storage_token).decode('ascii')
         ## Other Parameter
