@@ -39,7 +39,7 @@ https://github.com/chanon-kr/Shared_Function
 ***
 ### gcp
   - To download and upload file from GCP's bucket Storage
-  - Dependecies and Sample of use => https://github.com/chanon-kr/Shared_Function/blob/main/samples/gcp.ipynb
+  - Dependecies and Sample of use => https://github.com/chanon-kr/Shared_Function/blob/main/samples/lazy_GCS.ipynb
 
 ***
 ### socket
