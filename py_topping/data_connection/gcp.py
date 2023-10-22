@@ -19,11 +19,11 @@ class lazy_GCS :
         bucket = client.get_bucket(self.bucket_name)
         # list all objects in the directory
         blobs = bucket.list_blobs(prefix=bucket_folder)
-        files, folders = [], []
+        files, folders, source = [], [], []
         for blob in blobs :
             if debug : print(f"{blob} -> {blob.name}")
             if (blob.name.endswith("/")) : 
-                if (blob.name in [f'{bucket_folder}/', bucket_folder]) : source = [blob]
+                if (blob.name in [f'{bucket_folder}/', bucket_folder]) : source.append(blob)
                 else : folders.append(blob) # Folder
             else : files.append(blob) # File
         if not all_file :
