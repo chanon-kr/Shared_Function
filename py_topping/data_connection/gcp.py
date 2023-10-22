@@ -10,7 +10,7 @@ class lazy_GCS :
         self.credentials = credential
 
     def list_folder(self, bucket_folder ,as_blob = False, include_self= False
-                    , get_file = True, get_folder = False, all_file = False ) :
+                    , get_file = True, get_folder = False, all_file = False , debug = False) :
         if self.credentials == '' : pass
         else : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials
         # Initialise a client
@@ -21,6 +21,7 @@ class lazy_GCS :
         blobs = bucket.list_blobs(prefix=bucket_folder)
         files, folders = [], []
         for blob in blobs :
+            if debug : print(f"{blob} -> {blob.name}")
             if (blob.name.endswith("/")) : 
                 if (blob.name == f'{bucket_folder}/') : source = [blob]
                 else : folders.append(blob) # Folder
@@ -134,13 +135,13 @@ class lazy_GCS :
         # blob = bucket.blob(bucket_file)
         # blob.delete()
             
-    def delete_folder(self, bucket_folder , delete_folder = False, deep_delete = False):
+    def delete_folder(self, bucket_folder , delete_folder = False, deep_delete = False, debug = False):
         if self.credentials == '' : pass
         else : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials
         # Get blobs
         blobs = self.list_folder(bucket_folder = bucket_folder 
                                 , as_blob = True, get_file = True, get_folder = deep_delete
-                                , all_file = deep_delete, include_self = False)
+                                , all_file = deep_delete, include_self = False, debug= debug)
         for blob in blobs : blob.delete()
         if delete_folder : self.delete(bucket_file= bucket_folder + '' if bucket_folder.endswith('/') else '/')
 
