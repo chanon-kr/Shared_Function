@@ -143,7 +143,7 @@ class lazy_GCS :
         else : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials
         # Get blobs
         blobs = self.list_folder(bucket_folder = bucket_folder 
-                                , as_blob = True, get_file = True, get_folder = deep_delete
+                                , as_blob = True, get_file = True, get_folder = delete_folder
                                 , all_file = deep_delete, include_self = delete_folder, debug= debug)
         for blob in blobs : 
             if debug : print(f'Deleting : {blob.name}')
