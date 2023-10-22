@@ -23,7 +23,8 @@ class lazy_GCS :
         for blob in blobs :
             if debug : print(f"{blob} -> {blob.name}")
             if (blob.name.endswith("/")) : 
-                if (blob.name == f'{bucket_folder}/') & include_self : folders.append(blob)
+                if (blob.name == f'{bucket_folder}/') : 
+                    if include_self : folders.append(blob)
                 else : folders.append(blob) # Folder
             else : files.append(blob) # File
         if not all_file :
@@ -144,9 +145,9 @@ class lazy_GCS :
         blobs = self.list_folder(bucket_folder = bucket_folder 
                                 , as_blob = True, get_file = True, get_folder = deep_delete
                                 , all_file = deep_delete, include_self = delete_folder, debug= debug)
-        if debug : 
-            for i in blobs : print(blob)
-        for blob in blobs : blob.delete()
+        for blob in blobs : 
+            if debug : print(f'Deleting : {blob.name}')
+            blob.delete()
 
     def copy(self, source_bucket_file, destination_bucket_name, destination_bucket_file = ''):
         if self.credentials == '' : pass
