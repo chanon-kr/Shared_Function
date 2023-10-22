@@ -28,7 +28,7 @@ class lazy_GCS :
             else : files.append(blob) # File
         if not all_file :
             for folder in folders : files = [file for file in files if not file.name.startswith(folder.name)]
-        if include_self : folders + source
+        if include_self : folders += source
         if debug :
             print_file, print_folder = '\n'.join([x.name for x in files]), '\n'.join([x.name for x in folders])
             print(f"File to delete -> \n{print_file}")
