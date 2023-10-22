@@ -139,8 +139,9 @@ class lazy_GCS :
         # Get blobs
         blobs = self.list_folder(bucket_folder = bucket_folder 
                                 , as_blob = True, get_file = True, get_folder = deep_delete
-                                , all_file = deep_delete, include_self = delete_folder)
+                                , all_file = deep_delete, include_self = False)
         for blob in blobs : blob.delete()
+        if delete_folder : self.delete(bucket_file= bucket_folder + '' if bucket_folder.endswith('/') else '/')
 
     def copy(self, source_bucket_file, destination_bucket_name, destination_bucket_file = ''):
         if self.credentials == '' : pass
