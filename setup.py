@@ -12,7 +12,7 @@ requirements = [
 
 setuptools.setup(
     name="py_topping",
-    version="0.4.8",
+    version="0.4.9",
     license = "MIT",	
     author="Chanon Krittapholchai",
     author_email="chanon.krittapholchai@gmail.com",
@@ -20,7 +20,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/chanon-kr/Shared_Function",
-    download_url = "https://github.com/chanon-kr/Shared_Function/archive/v0.4.8.tar.gz",
+    download_url = "https://github.com/chanon-kr/Shared_Function/archive/v0.4.9.tar.gz",
     keywords = ["utility","ETL"],
     packages=setuptools.find_packages(),
     classifiers=[
