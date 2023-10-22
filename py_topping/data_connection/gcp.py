@@ -24,11 +24,12 @@ class lazy_GCS :
             if debug : print(f"{blob} -> {blob.name}")
             if (blob.name.endswith("/")) : 
                 if (blob.name == f'{bucket_folder}/') : 
-                    if include_self : folders.append(blob)
+                    if include_self : source = [blob]
                 else : folders.append(blob) # Folder
             else : files.append(blob) # File
         if not all_file :
             for folder in folders : files = [file for file in files if not file.name.startswith(folder.name)]
+        if include_self : folders + source
         if debug :
             print_file, print_folder = '\n'.join([x.name for x in files]), '\n'.join([x.name for x in folders])
             print(f"File to delete -> \n{print_file}")
