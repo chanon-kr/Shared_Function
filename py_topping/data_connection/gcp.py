@@ -23,8 +23,7 @@ class lazy_GCS :
         for blob in blobs :
             if debug : print(f"{blob} -> {blob.name}")
             if (blob.name.endswith("/")) : 
-                if (blob.name == f'{bucket_folder}/') : 
-                    if include_self : source = [blob]
+                if (blob.name == f'{bucket_folder}/') : source = [blob]
                 else : folders.append(blob) # Folder
             else : files.append(blob) # File
         if not all_file :
