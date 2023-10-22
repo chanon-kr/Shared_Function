@@ -130,8 +130,9 @@ class lazy_GCS :
         else : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials
         client = storage.Client(self.project_id)
         bucket = client.get_bucket(self.bucket_name)
-        blob = bucket.blob(bucket_file)
-        blob.delete()
+        bucket.delete_blob(bucket_file)
+        # blob = bucket.blob(bucket_file)
+        # blob.delete()
             
     def delete_folder(self, bucket_folder , delete_folder = False, deep_delete = False):
         if self.credentials == '' : pass
