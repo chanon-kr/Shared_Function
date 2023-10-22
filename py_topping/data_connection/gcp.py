@@ -28,6 +28,10 @@ class lazy_GCS :
             else : files.append(blob) # File
         if not all_file :
             for folder in folders : files = [file for file in files if not file.name.startswith(folder.name)]
+        if debug :
+            print_file, print_folder = '\n'.join([x.name for x in files]), '\n'.join([x.name for x in folders])
+            print(f"File to delete -> \n{print_file}")
+            print(f"Folder to delete -> \n{print_folder}")
         out_put = [file for file in files if get_file] + [folder for folder in folders if get_folder]
         if as_blob : return [blob for blob in out_put]
         else : return [blob.name for blob in out_put]
@@ -130,9 +134,8 @@ class lazy_GCS :
         else : os.environ["GOOGLE_APPLICATION_CREDENTIALS"]= self.credentials
         client = storage.Client(self.project_id)
         bucket = client.get_bucket(self.bucket_name)
-        bucket.delete_blob(bucket_file)
-        # blob = bucket.blob(bucket_file)
-        # blob.delete()
+        blob = bucket.blob(bucket_file)
+        blob.delete()
             
     def delete_folder(self, bucket_folder , delete_folder = False, deep_delete = False, debug = False):
         if self.credentials == '' : pass
