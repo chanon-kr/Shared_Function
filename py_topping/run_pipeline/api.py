@@ -140,7 +140,19 @@ class lazy_API :
             return get_redoc_html(openapi_url="/openapi.json", title="docs")
 
     def create_post(self, function, name, tags = [], example = {}, examples = {}, callback = 'default') :
-        """Create POST Method for FastAPI"""
+        """Create a Endpoint with POST Method for FastAPI
+        function : Function for the endpoint (Callable)
+        name : Endpoint name (Str)
+        tags : Tags of endpoint that will display in document (List of Str)
+        examples : Example of payload that will display in document (Dict)
+        callback :  A specific callback when this endpoint fail.
+                    The custom callback will feed with this dict ;
+                    { 'traceback' : traceback.format_exc() 
+                    , 'exception' : e 
+                    , 'input' : query input for GET or body input for POST}
+                    Or fill this parameter with 'default' to use API's callback.
+                    (Function), Default 'default'
+        """
         # Assign Default Callback
         if (type(callback) == str) : 
             if callback == 'default' : callback = self.callback
