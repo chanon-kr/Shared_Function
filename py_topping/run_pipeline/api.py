@@ -13,7 +13,9 @@ from fastapi.openapi.utils import get_openapi
 # from pydantic import create_model
 
 class lazy_API :
-    def __init__(self, title, version, description
+    def __init__(self, title : str
+                     , version : str
+                     , description : str
                      , username = 'user'
                      , password = 'password'
                      , authen_type = 'basic' 
