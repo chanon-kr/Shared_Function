@@ -139,15 +139,18 @@ class lazy_API :
         async def get_redoc_documentation(username: str = Depends(self.basic_authen_check)):
             return get_redoc_html(openapi_url="/openapi.json", title="docs")
 
-    def create_post(self, function, name, tags = [], example = {}, examples = [], callback = 'default') :
+    def create_post(self, function, name, tags = [], example = {}, examples = {}, callback = 'default') :
         """Create POST Method for FastAPI"""
         # Assign Default Callback
         if (type(callback) == str) : 
             if callback == 'default' : callback = self.callback
+        # Backward Compatible with older version
+        if examples == {} : doc_example = {'example' : example}
+        else : doc_example = {'examples' : [examples]}
         # Assign Authen ####
         authen_selected = self.select_authen_type(self.post_weak_authen_check)
         @self.app.post(f'/{name}' , tags = tags)
-        async def post_function(  payload : dict = Body(... , example = example)
+        async def post_function(  payload : dict = Body(... , **doc_example)
                                 , username : str = Depends( authen_selected)
                                 ) :
             try :
