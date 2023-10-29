@@ -94,7 +94,7 @@ class lazy_API :
         raise HTTPException(status_code=401, detail="Invalid token", headers={"WWW-Authenticate": "Bearer Token"})    
 
     ## For API
-    def weak_authen_check(self, input_dict):
+    def weak_authen_check(self, input_dict : dict):
         """
         Sub Authentication for API in order to use with GCP Authentication
         , only use this function when 'api_weak_authen' is True
@@ -120,7 +120,7 @@ class lazy_API :
     def post_weak_authen_check(self, payload: dict):
         self.weak_authen_check(payload)
 
-    def select_authen_type(self, weak_method) :
+    def select_authen_type(self, weak_method : str) :
         if self.api_weak_authen | (self.authen_type == None) :
             return weak_method
         elif self.authen_type == 'basic' :
@@ -141,7 +141,13 @@ class lazy_API :
         async def get_redoc_documentation(username: str = Depends(self.basic_authen_check)):
             return get_redoc_html(openapi_url="/openapi.json", title="docs")
 
-    def create_post(self, function, name, tags = [], example = {}, examples = {}, callback = 'default') :
+    def create_post(self
+                    , function
+                    , name : str
+                    , tags = []
+                    , example = {}
+                    , examples = {}
+                    , callback = 'default') :
         """Create a Endpoint with POST Method for FastAPI
         function : Function for the endpoint (Callable)
         name : Endpoint name (Str)
@@ -181,7 +187,13 @@ class lazy_API :
                                     , content=return_error)
 
 
-    def create_get(self, function, name, tags = [], example = {}, examples = [], callback = 'default') :
+    def create_get(self
+                   , function
+                   , name : str
+                   , tags = []
+                   , example = {}
+                   , examples = []
+                   , callback = 'default') :
         """Create a Endpoint with GET Method for FastAPI
         function : Function for the endpoint (Callable)
         name : Endpoint name (Str)
