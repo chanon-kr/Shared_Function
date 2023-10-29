@@ -139,7 +139,7 @@ class lazy_API :
         async def get_redoc_documentation(username: str = Depends(self.basic_authen_check)):
             return get_redoc_html(openapi_url="/openapi.json", title="docs")
 
-    def create_post(self, function, name, tags = [], example = {}, callback = 'default') :
+    def create_post(self, function, name, tags = [], example = {}, examples = [], callback = 'default') :
         """Create POST Method for FastAPI"""
         # Assign Default Callback
         if (type(callback) == str) : 
@@ -164,7 +164,7 @@ class lazy_API :
                                     , content=return_error)
 
 
-    def create_get(self, function, name, tags = [], example = {}, callback = 'default') :
+    def create_get(self, function, name, tags = [], example = {}, examples = [], callback = 'default') :
         """Create GET Method for FastAPI"""
         # Assign Default Callback
         if (type(callback) == str) : 
