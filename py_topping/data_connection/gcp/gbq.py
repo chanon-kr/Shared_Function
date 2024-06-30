@@ -29,12 +29,12 @@ class lazy_GBQ :
     def create_table(self, table_name, schema_path, table_parameter) :
         # Set up
         table= bigquery.Table(table_name, self.client.schema_from_json(schema_path))
-        # If no table_parameter -> Create immediately
-        if table_parameter == None : return self.client.create_table(table)
+        # If no table_parameter -> Fail
+        if table_parameter == None : raise Exception ("Please provide `table_parameter` parameter`")
         # Add parameters
         table.clustering_fields= table_parameter.get('clustering_fields',None)
         table.description= table_parameter.get('description',None)
-        table.labels= table_parameter.get('labels',None)
+        table.labels= table_parameter.get('labels',{})
         # Add partition parameters
         if table_parameter.get('partition_column',None) != None :
             partition_type= table_parameter['partition_type'].lower()
