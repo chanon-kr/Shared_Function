@@ -3,22 +3,50 @@ from google.cloud import bigquery
 import string, random
 from google.cloud.exceptions import NotFound
 from pandas_gbq import to_gbq
+from pandas import DataFrame
 import json
 
 class lazy_GBQ :
-    def __init__(self, project_id, dataset_id= None, credentials_path = None, mute= False) :
+    def __init__(self, 
+                 project_id : str, 
+                 dataset_id= None, 
+                 credentials_path = None, 
+                 mute= False) :
+        """
+        Create a Google BigQuery connection,
+        Args :
+         - project_id : The default project id for connection
+        Optional Args :
+         - dataset_id : The default dataset id, only used for get_draft_schema method, default None
+         - credentials_path : Path to your credentials file, default None
+         - mute : If True, the connection will not print debuging message, default False
+        """
+        # Set up
         self.project_id = project_id
         self.dataset_id = dataset_id
         self.mute = mute
+        # Set up service account if needed
         if credentials_path != None : 
             self.credentials = service_account.Credentials.from_service_account_file(credentials_path)
         else : self.credentials = None
+        # Create connection
         self.client= bigquery.Client(project=self.project_id, credentials=self.credentials)
+        # Print connection result if not mute
         if not self.mute : 
             r= self.client.query("SELECT 'CONNECTION OK'").result().to_arrow()
             print(r[0][0])
 
-    def insert_replace(self, dataframe, table_name, schema_path) :
+    def insert_replace(self, 
+                       dataframe : DataFrame, 
+                       table_name : str, 
+                       schema_path : str) :
+        """
+        Core insert method, using `WRITE_TRUNCATE`
+        Args :
+         - dataframe : A Pandas DataFrame to insert into GBQ
+         - table_name : A full GBQ's table name
+         - schema_path : A path to table's schema file
+        """
         job_config = bigquery.LoadJobConfig(
                                         schema= self.client.schema_from_json(schema_path),
                                         write_disposition="WRITE_TRUNCATE",
@@ -26,7 +54,48 @@ class lazy_GBQ :
         job = self.client.load_table_from_dataframe(dataframe, table_name, job_config=job_config) 
         return job.result()
 
-    def create_table(self, table_name, schema_path, table_parameter) :
+    def create_table(self,
+                     table_name : str, 
+                     schema_path : str, 
+                     table_parameter : dict) :
+        """
+        A function to create GBQ Table,
+        Args :
+         - table_name : A full GBQ's table name
+         - schema_path : A path to schema file
+         - table_parameter : A dict of GBQ parameter which contains
+           - clustering_fields : A list of clustering fields
+           - description : A description of the table
+           - labels : A dict of table's labels
+           - partition_column : A Partition Column's name
+           - require_partition_filter : A boolean to require partition filter or not
+           - partition_type : Type of table's partition, in range, int, day, month, year
+           - range_partition_start : For range/int partition_type, specific where partition start
+           - range_partition_end : For range/int partition_type, specific where partition end
+           - range_partition_interval : For range/int partition_type, specific partition interval
+           example of table_parameter :
+                table_parameter = { 
+                    'clustering_fields' : ['col1','col2'],
+                    'description' : 'description',
+                    'labels' : {'key1' : 'value1',},
+                    'partition_column' : 'partition_col',
+                    'require_partition_filter' : True,
+                    'partition_type' : 'day', 
+                }
+                or
+                table_parameter = { 
+                    'clustering_fields' : ['col1','col2'],
+                    'description' : 'description',
+                    'labels' : {'key1' : 'value1',},
+                    'partition_column' : 'partition_col',
+                    'require_partition_filter' : True,
+                    'partition_type' : 'range',
+                    'range_partition_start' : 1000,
+                    'range_partition_end' : 3000,
+                    'range_partition_interval' : 10,
+                     
+                }
+        """
         # Set up
         table= bigquery.Table(table_name, self.client.schema_from_json(schema_path))
         # If no table_parameter -> Fail
@@ -60,7 +129,16 @@ class lazy_GBQ :
         # Create and return
         return self.client.create_table(table)
         
-    def get_draft_schema(self, dataframe, schema_path= 'schema.json') :
+    def get_draft_schema(self, 
+                         dataframe : DataFrame, 
+                         schema_path= 'schema.json') :
+        """
+        A Function to get schema from the dataframe
+        Args :
+         - dataframe : A Pandas DataFrame to insert into GBQ
+        Optional Args :
+         - schema_path : An output path for schema, default 'schema.json'
+        """
         assert self.dataset_id != None, "`dataset_id` must be setted to get draft schema"
         # Create Random String as Temp Table Name
         temp_table_name= ''.join(random.choice(string.ascii_lowercase) for _ in range(20))
@@ -76,7 +154,51 @@ class lazy_GBQ :
         self.client.delete_table(full_temp_name, not_found_ok=True)
         return schema_path
     
-    def table_exists_or_create(self, table_name, schema_path, table_parameter, ignore_create_parameter) :
+    def table_exists_or_create(self, 
+                               table_name : str, 
+                               schema_path : str, 
+                               table_parameter : dict, 
+                               ignore_create_parameter : bool) :
+        """
+        A function to check if table exist,
+        If not exist, will create a table as configured
+        Args :
+         - table_name : A target table to check or create
+         - schema_path : A path to schema file
+         - ignore_create_parameter : Will return False when the table doesn't exist and config files not input
+         - table_parameter : A dict of GBQ parameter which contains
+           - clustering_fields : A list of clustering fields
+           - description : A description of the table
+           - labels : A dict of table's labels
+           - partition_column : A Partition Column's name
+           - require_partition_filter : A boolean to require partition filter or not
+           - partition_type : Type of table's partition, in range, int, day, month, year
+           - range_partition_start : For range/int partition_type, specific where partition start
+           - range_partition_end : For range/int partition_type, specific where partition end
+           - range_partition_interval : For range/int partition_type, specific partition interval
+           example of table_parameter :
+                table_parameter = { 
+                    'clustering_fields' : ['col1','col2'],
+                    'description' : 'description',
+                    'labels' : {'key1' : 'value1',},
+                    'partition_column' : 'partition_col',
+                    'require_partition_filter' : True,
+                    'partition_type' : 'day', 
+                }
+                or
+                table_parameter = { 
+                    'clustering_fields' : ['col1','col2'],
+                    'description' : 'description',
+                    'labels' : {'key1' : 'value1',},
+                    'partition_column' : 'partition_col',
+                    'require_partition_filter' : True,
+                    'partition_type' : 'range',
+                    'range_partition_start' : 1000,
+                    'range_partition_end' : 3000,
+                    'range_partition_interval' : 10,
+                     
+                }
+        """
         try:
             return self.client.get_table(table_name)
         except NotFound:
@@ -115,21 +237,50 @@ class lazy_GBQ :
             return dataframe[partition_dict['partition_col']].apply(lambda x : int(x/partition_dict['partition_format']))
         
     def partition_insert(self, 
-                         dataframe, table_name, schema_path, 
-                         table_parameter= None, ignore_create_parameter= False,
-                         sharding_column= None, sharding_format= '%Y%m%d') :
+                         dataframe : DataFrame, 
+                         table_name : str, 
+                         schema_path : str, 
+                         table_parameter= None, 
+                         ignore_create_parameter= False,) :
         """
-        table_parameter = { 
-            'clustering_fields' : ['col1','col2'],
-            'description' : 'description',
-            'labels' : {'key1' : 'value1',},
-            'partition_column' : 'partition_col',
-            'require_partition_filter' : boolean,
-            'partition_type' : 'day', # in range, int, day, month, year
-            'range_partition_start' : int, # For range/int only
-            'range_partition_end' : int, # For range/int only
-            'range_partition_interval' : int, # For range/int only
-        }
+        A function to insert a Pandas DataFrame into partition(s) of BigQuery's Table
+        Args : 
+         - dataframe : A Pandas DataFrame to insert into GBQ
+         - table_name : A full GBQ's table name
+         - schema_path : A path to table's schema file
+         - ignore_create_parameter : Will return False when the table doesn't exist and config files not input, default False
+         - table_parameter : A dict of GBQ parameter which contains
+           - clustering_fields : A list of clustering fields
+           - description : A description of the table
+           - labels : A dict of table's labels
+           - partition_column : A Partition Column's name
+           - require_partition_filter : A boolean to require partition filter or not
+           - partition_type : Type of table's partition, in range, int, day, month, year
+           - range_partition_start : For range/int partition_type, specific where partition start
+           - range_partition_end : For range/int partition_type, specific where partition end
+           - range_partition_interval : For range/int partition_type, specific partition interval
+           example of table_parameter :
+                table_parameter = { 
+                    'clustering_fields' : ['col1','col2'],
+                    'description' : 'description',
+                    'labels' : {'key1' : 'value1',},
+                    'partition_column' : 'partition_col',
+                    'require_partition_filter' : True,
+                    'partition_type' : 'day', 
+                }
+                or
+                table_parameter = { 
+                    'clustering_fields' : ['col1','col2'],
+                    'description' : 'description',
+                    'labels' : {'key1' : 'value1',},
+                    'partition_column' : 'partition_col',
+                    'require_partition_filter' : True,
+                    'partition_type' : 'range',
+                    'range_partition_start' : 1000,
+                    'range_partition_end' : 3000,
+                    'range_partition_interval' : 10,
+                     
+                }
         """
         # Check Table Exists
         table= self.table_exists_or_create(table_name, schema_path, table_parameter, ignore_create_parameter)
