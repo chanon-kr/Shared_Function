@@ -23,7 +23,7 @@ class lazy_S3 :
         
 
     def download(self, bucket_file, local_file):
-        self.client.dowload_file(Bucket= self.bucket_name,
+        self.client.download_file(Bucket= self.bucket_name,
                                  Filename= local_file,
                                  Key= bucket_file)
 
