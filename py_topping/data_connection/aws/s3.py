@@ -17,9 +17,18 @@ class lazy_S3 :
 
     def list_folder(self, bucket_folder ,as_blob = False, include_self= False
                     , get_file = True, get_folder = False, all_file = False , debug = False) :
-        r= self.client.list_objects_v2(Bucket= self.bucket_name).get('Contents',[])
-        if as_blob : return [blob for blob in r if blob['Key'].startswith(bucket_folder)]
-        else : return [blob['Key'] for blob in r if blob['Key'].startswith(bucket_folder)]
+        # if all_file :
+        #   r= []
+        #   paginator= self.client.get_paginator('list_object_v2')
+        #   page_iterator= paginator.paginate(Bucket= self.bucket_name, Prefix= bucket_folder)
+        #   for page in page_iterator :
+        #       if 'Contents' in page : 
+        #           r+= [obj for obj in page['Content']]
+        # else :
+        res= self.client.list_objects_v2(Bucket= self.bucket_name, Prefix= bucket_folder)
+        r= res.get('Contents',[])
+        if as_blob : return [blob for blob in r ]
+        else : return [blob['Key'] for blob in r ]
         
 
     def download(self, bucket_file, local_file):
